@@ -5,16 +5,25 @@ Proyecto para el curso de **Fundamentos de Econometría**. Usa datos reales para
 ## Datos
 `wage2` de Wooldridge (*Introductory Econometrics*): 935 hombres trabajadores de la *National Longitudinal Survey* (EE. UU., 1980), con salario, educación, experiencia, antigüedad, edad, IQ, KWW y escolaridad de los padres. Se carga directamente con el paquete [`wooldridge`](https://pypi.org/project/wooldridge/).
 
+## Entregables
+- [`Reporte_Multicolinealidad_Mincer.docx`](Reporte_Multicolinealidad_Mincer.docx): reporte escrito (9 páginas)
+- [`Presentacion_Multicolinealidad_Mincer.pptx`](Presentacion_Multicolinealidad_Mincer.pptx): presentación (12 diapositivas)
+- [`multicolinealidad_mincer.ipynb`](multicolinealidad_mincer.ipynb): análisis completo con código
+- [`figuras/`](figuras/): gráficas en alta resolución
+
+Para regenerar todo: `python scripts/build_notebook.py multicolinealidad_mincer.ipynb` y `python scripts/generar_entregables.py`.
+
 ## Contenido del análisis ([`multicolinealidad_mincer.ipynb`](multicolinealidad_mincer.ipynb))
 1. Estadística descriptiva y matriz de correlaciones
 2. **Multicolinealidad perfecta**: la experiencia potencial `age − educ − 6` hace que X'X sea singular
-3. **Multicolinealidad imperfecta**: VIF, número de condición, contraste entre las t individuales y la F conjunta
+3. **Multicolinealidad imperfecta**: VIF, número de condición, Farrar-Glauber, regla de Klein, contraste entre las t individuales y la F conjunta
 4. Soluciones:
    - centrar `exper` (el VIF baja de 24 a 2 sin cambiar el R²)
    - eliminar o combinar variables redundantes
    - componentes principales
    - regresión Ridge
-5. Comparación de modelos (R², R² ajustado, AIC, BIC, VIF máximo)
+5. Validación del modelo final: Breusch-Pagan, White, errores robustos HC1, RESET, Jarque-Bera
+6. Comparación de modelos (R², R² ajustado, AIC, BIC, VIF máximo)
 
 ## Resultados principales
 | Modelo   | β educ | R² aj. | VIF máx |
