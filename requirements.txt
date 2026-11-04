@@ -1,0 +1,8 @@
+wooldridge
+pandas
+numpy
+statsmodels
+matplotlib
+seaborn
+scikit-learn
+jupyter
