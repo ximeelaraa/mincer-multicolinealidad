@@ -6,7 +6,8 @@ statsmodels
 matplotlib
 seaborn
 scikit-learn
+plotly
 jupyter
-nbformat
+jupytext
 python-docx
 python-pptx
