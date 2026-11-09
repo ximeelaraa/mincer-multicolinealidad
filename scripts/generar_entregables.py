@@ -956,9 +956,9 @@ Klein: $R_j^2>R^2=@R2@$ en 8 de 13 regresores.
 
 \begin{frame}{Comparación de especificaciones}
 \begin{columns}[T]
-\column{0.58\textwidth}\centering\small
+\column{0.60\textwidth}\centering\footnotesize\setlength{\tabcolsep}{4pt}
 @TABC@
-\column{0.42\textwidth}
+\column{0.38\textwidth}
 \includegraphics[width=\linewidth]{educ}
 \end{columns}
 \vspace{0.5em}

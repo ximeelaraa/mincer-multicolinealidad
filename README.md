@@ -10,7 +10,8 @@ Proyecto para **Fundamentos de Econometría**. Usa datos reales para estimar el 
 | [`Presentacion_Multicolinealidad_Mincer.pdf`](Presentacion_Multicolinealidad_Mincer.pdf) | Presentación en PDF (20 diapositivas) |
 | [`Reporte_Multicolinealidad_Mincer.docx`](Reporte_Multicolinealidad_Mincer.docx) | Reporte escrito (15 páginas) |
 | [`Presentacion_Multicolinealidad_Mincer.pptx`](Presentacion_Multicolinealidad_Mincer.pptx) | Presentación en PowerPoint (20 diapositivas) |
-| [`Presentacion_Beamer.tex`](Presentacion_Beamer.tex) | Presentación en LaTeX Beamer (28 frames) |
+| [`Presentacion_Beamer.pdf`](Presentacion_Beamer.pdf) | **Presentación Beamer compilada (28 diapositivas)** |
+| [`Presentacion_Beamer.tex`](Presentacion_Beamer.tex) | Código LaTeX Beamer |
 | [`Beamer_Overleaf.zip`](Beamer_Overleaf.zip) | El `.tex` y sus figuras, listo para subir a Overleaf |
 | [`resultados.json`](resultados.json) | Todos los números que usan el reporte y las presentaciones |
 | [`figuras/`](figuras/) | Gráficas en alta resolución |
