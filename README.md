@@ -6,6 +6,8 @@ Proyecto para **Fundamentos de Econometría**. Usa datos reales para estimar el 
 | Archivo | Qué es |
 |---|---|
 | [`multicolinealidad_mincer.ipynb`](multicolinealidad_mincer.ipynb) | Análisis completo con código y resultados (74 celdas, corre en Colab) |
+| [`Reporte_Multicolinealidad_Mincer.pdf`](Reporte_Multicolinealidad_Mincer.pdf) | **Reporte en PDF (para verlo directo)** |
+| [`Presentacion_Multicolinealidad_Mincer.pdf`](Presentacion_Multicolinealidad_Mincer.pdf) | Presentación en PDF (20 diapositivas) |
 | [`Reporte_Multicolinealidad_Mincer.docx`](Reporte_Multicolinealidad_Mincer.docx) | Reporte escrito (15 páginas) |
 | [`Presentacion_Multicolinealidad_Mincer.pptx`](Presentacion_Multicolinealidad_Mincer.pptx) | Presentación en PowerPoint (20 diapositivas) |
 | [`Presentacion_Beamer.tex`](Presentacion_Beamer.tex) | Presentación en LaTeX Beamer (28 frames) |
