@@ -1,4 +1,4 @@
-\documentclass[aspectratio=169,10pt]{beamer}
+\documentclass[aspectratio=169,11pt]{beamer}
 \usepackage{iftex}
 \ifPDFTeX
 \usepackage[utf8]{inputenc}
@@ -8,727 +8,147 @@
 \usepackage{fontspec}
 \fi
 \usepackage[spanish,es-nodecimaldot,es-noshorthands]{babel}
-\usepackage{amsmath,amssymb}
-\usepackage{booktabs}
-\usepackage{graphicx}
-\usepackage{appendixnumberbeamer}
+\usepackage{amsmath,amssymb,booktabs,graphicx}
 \graphicspath{{figuras/}}
-
-\usetheme{default}
 \definecolor{tinta}{HTML}{1D2433}
 \definecolor{azul}{HTML}{2F6F9F}
 \definecolor{naranja}{HTML}{D1603D}
+\definecolor{suave}{HTML}{EEF3F8}
 \setbeamercolor{frametitle}{bg=tinta,fg=white}
-\setbeamercolor{title}{fg=tinta}
 \setbeamercolor{structure}{fg=azul}
 \setbeamercolor{alerted text}{fg=naranja}
 \setbeamertemplate{navigation symbols}{}
-\setbeamertemplate{frametitle}{\nointerlineskip\begin{beamercolorbox}[wd=\paperwidth,ht=2.6ex,dp=1.2ex,leftskip=1em]{frametitle}\usebeamerfont{frametitle}\insertframetitle\end{beamercolorbox}}
-\setbeamertemplate{footline}{\hfill\scriptsize\color{gray}\insertframenumber/\inserttotalframenumber\hspace{1em}\vspace{0.6em}}
-\newcommand{\dato}[2]{\begin{minipage}{0.3\textwidth}\centering{\Huge\color{naranja}\textbf{#1}}\\[0.3em]\small #2\end{minipage}}
+\setbeamertemplate{frametitle}{\nointerlineskip\begin{beamercolorbox}[wd=\paperwidth,ht=3ex,dp=1.4ex,leftskip=1em]{frametitle}\usebeamerfont{frametitle}\insertframetitle\end{beamercolorbox}}
+\setbeamertemplate{footline}{\hfill\scriptsize\color{gray}\insertframenumber\hspace{1em}\vspace{0.6em}}
+\newcommand{\dato}[3][azul]{\begin{minipage}[t]{0.31\textwidth}\centering{\fontsize{26}{30}\selectfont\color{#1}\textbf{#2}}\\[0.5em]\small #3\end{minipage}}
+\newcommand{\mensaje}[1]{\par\vfill\colorbox{suave}{\parbox{\dimexpr\textwidth-2\fboxsep}{\centering\color{tinta}\textbf{#1}}}\par\vspace{0.3em}}
 
 \title{Escolaridad, habilidad y salario}
-\subtitle{¿La multicolinealidad impide medir la asociación? Una ecuación de Mincer con datos de la NLS (EE.\,UU., 1980)}
-\author{Equipo 4: Ximena Lara, Camila Ricardi y Sara Enriquez}
+\subtitle{¿La multicolinealidad nos impide medir cuánto se asocia la escuela con el salario?}
+\author{Equipo 4: Ximena Lara, Camila Ricardi, Sara Enriquez}
 \institute{Fundamentos de Econometría · Prof. César Galindo · Universidad Panamericana}
 \date{Noviembre 2026}
 
 \begin{document}
+\begin{frame}\titlepage\end{frame}
 
-\begin{frame}
-\titlepage
-\end{frame}
+\begin{frame}{La pregunta}
+\vspace{0.5em}
+{\Large\color{tinta}\textbf{¿Cuánto más gana alguien con un año más de escuela, comparado con alguien igual en experiencia, habilidad y familia?}}
+\vspace{1.2em}
 
-\begin{frame}{Pregunta e hipótesis}
-\begin{itemize}
-\item \textbf{Pregunta:} ¿cómo se asocia la escolaridad con el salario de hombres trabajadores en EE.\,UU. (1980), comparando personas con igual experiencia, antigüedad, habilidad medida y antecedentes familiares?
-\item ¿Qué tan precisamente podemos medirla si esos controles están correlacionados entre sí (\alert{multicolinealidad})?
-\item $H_0:\beta_{educ}=0$ vs $H_1:\beta_{educ}>0$, con $\alpha=5\%$ fijado antes de estimar.
-\item Esperamos $\beta_{educ}>0$, pero menor que en la regresión simple: sin controles, $educ$ capta habilidad (sesgo por variable omitida).
-\item \textbf{Alcance:} datos observacionales $\Rightarrow$ asociaciones condicionadas, no efectos causales.
-\end{itemize}
+\dato{$H_1:\beta>0$}{esperamos una relación positiva}\hfill
+\dato{$\alpha=5\%$}{nivel de significancia fijado antes de estimar}\hfill
+\dato[naranja]{$\neq$ causa}{datos observacionales: medimos asociación}
+\mensaje{Reto: escolaridad, habilidad y familia se mueven juntas $\to$ multicolinealidad}
 \end{frame}
 
 \begin{frame}{Datos}
-\begin{columns}[T]
-\column{0.55\textwidth}\small
+\vspace{0.5em}
+\dato{722}{hombres trabajadores de 28 a 38 años}\hfill
+\dato{1980}{EE.\,UU., encuesta NLS (corte transversal)}\hfill
+\dato{13}{variables explicativas}
+\vspace{1.5em}
 \begin{itemize}
-\item \textbf{Fuente:} WAGE2 (Wooldridge), de la \textit{National Longitudinal Survey of Young Men}, EE.\,UU. 1980 (Blackburn y Neumark, 1992). Paquete \texttt{wooldridge} 0.5.0, consultado el 18/11/2026.
-\item \textbf{Unidad:} hombre trabajador de 28--38 años; corte transversal.
-\item \textbf{Muestra:} 935 $\to$ $n=722$ (eliminamos 213 sin escolaridad de los padres).
-\item $Y=\ln(wage)$; $wage$ en USD mensuales de 1980 (asimétrico a la derecha).
-\item Archivo, diccionario y limpieza: \texttt{data/DICCIONARIO.md}.
-\end{itemize}
-\column{0.42\textwidth}\centering\footnotesize
-\begin{tabular}{lrrrr}
-\toprule
-Variable & Media & D.E. & Mín & Máx \\
-\midrule
-wage & 977.1 & 408.1 & 115 & 3078 \\
-educ & 13.7 & 2.2 & 9 & 18 \\
-exper & 11.3 & 4.2 & 1 & 22 \\
-tenure & 7.2 & 5.0 & 0 & 22 \\
-IQ & 102.1 & 14.8 & 54 & 145 \\
-KWW & 35.9 & 7.7 & 12 & 56 \\
-meduc & 10.8 & 2.8 & 0 & 18 \\
-feduc & 10.2 & 3.3 & 0 & 18 \\
-\bottomrule
-\end{tabular}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Modelo y signos esperados}
-\small
-\begin{align*}
-\ln w_i=\;&\beta_0+\beta_1 educ_i+\beta_2 exper^c_i+\beta_3 (exper^c_i)^2+\beta_4 tenure_i+\beta_5 age_i\\
-&+\beta_6 IQ_i+\beta_7 KWW_i+\beta_8 meduc_i+\beta_9 feduc_i+\text{dummies}_i+u_i
-\end{align*}
-\centering\footnotesize
-\begin{tabular}{lcl}
-\toprule
-Variable & Signo & Por qué \\
-\midrule
-educ & $+$ & Capital humano (variable de interés) \\
-exper$^c$, (exper$^c)^2$ & $+$, $-$ & Ciclo de vida; centrar evita colinealidad artificial \\
-tenure & $+$ & Capital específico de la empresa \\
-IQ, KWW & $+$ & Proxies de habilidad: por eso las incluimos \\
-meduc, feduc & $+$ & Entorno familiar \\
-married, black, south, urban & $+,-,-,+$ & Ref.: no casado, no afroam., fuera del sur, no urbano \\
-\bottomrule
-\end{tabular}
-
-\vspace{0.4em}\raggedright\small
-MCO con errores robustos HC1. Con $\ln w$, $100\beta$ es el cambio \% aproximado (exacto: $100(e^{\beta}-1)$), manteniendo constantes las demás variables.
-\end{frame}
-
-\begin{frame}{Resultados: la asociación cae al controlar habilidad}
-\begin{columns}[T]
-\column{0.64\textwidth}\centering\scriptsize\setlength{\tabcolsep}{3pt}
-\begin{tabular}{lccc}
-\toprule
-$\ln(wage)$ & (1) Simple & (2) Mincer & (3) Preferido \\
-\midrule
-educ & 0.0586\,(0.0067) & 0.0783\,(0.0074) & 0.0408\,(0.0097) \\
-exper (centrada) & -- & 0.0226\,(0.0037) & 0.0126\,(0.0046) \\
-IQ & -- & -- & 0.0037\,(0.0011) \\
-KWW & -- & -- & 0.0029\,(0.0027) \\
-Resto de controles & no & no & sí \\
-$R^2$ & 0.098 & 0.141 & 0.264 \\
-\bottomrule
-\end{tabular}
-
-\vspace{0.2em}\scriptsize EE robustos HC1 entre paréntesis; $n=722$.
-\column{0.34\textwidth}
-\includegraphics[width=\linewidth]{educ}
-\end{columns}
-\vspace{0.6em}
-\begin{center}
-$\hat\beta_{educ}$: 0.059 (simple) $\to$ 0.078 (Mincer) $\to$ \alert{0.041} (con habilidad y familia)\\[0.3em]
-\small La caída es \alert{sesgo por variable omitida} (habilidad), no multicolinealidad.
-\end{center}
-\end{frame}
-
-\begin{frame}{Interpretación de los coeficientes}
-\begin{center}
-\dato{+4.1\%}{salario por un año más de escolaridad ($\approx$ 41 USD/mes en la media)}\hfill
-\dato{[2.2, 6.0]}{IC 95\% robusto ($\times 100$): excluye 0 $\Rightarrow$ se rechaza $H_0$}\hfill
-\dato{+18\%}{asociado con 4 años de universidad: relevante}
-\end{center}
-\vspace{0.6em}
-\small
-\begin{itemize}
-\item Casado +21.5\% $\cdot$ urbano +19.7\% $\cdot$ sur $-$6.6\% (exactos) $\cdot$ afroamericano $-$7.4\% (no signif., $p=0.12$).
-\item IQ: $+1$ desv. est. $\to$ +5.4\%. KWW, meduc y feduc no son significativas solas.
-\item Experiencia +1.26\% por año; $exper^2\approx 0$ ($p=0.83$): en esta cohorte joven no se ve la concavidad.
-\item Significancia $\neq$ relevancia: reportamos magnitud, unidades e incertidumbre.
+\item Fuente: base WAGE2 de Wooldridge (Blackburn y Neumark, 1992), consultada el 18/11/2026.
+\item Limpieza: 935 $\to$ 722 (quitamos 213 sin escolaridad de los padres).
+\item $Y=\ln(\text{salario mensual en USD de 1980})$ $\to$ los coeficientes se leen como \%.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Multicolinealidad: ¿dónde está?}
-\begin{columns}[T]
-\column{0.42\textwidth}
-\includegraphics[width=\linewidth]{correlaciones}
-\column{0.56\textwidth}
-\includegraphics[width=\linewidth]{vif}
-\end{columns}
-\small
-\begin{itemize}
-\item $exper$ y $exper^2$: VIF 21 y 24 $\Rightarrow$ \alert{estructural} (polinomio, $r=0.975$). Al centrar: VIF máximo 2.17, mismo $R^2$.
-\item \alert{Sustantiva}: educ--IQ--KWW--padres, VIF moderados (1.6--2.2).
-\end{itemize}
-\end{frame}
-
-\begin{frame}{¿La multicolinealidad impide responder?}
-\begin{itemize}
-\item Infla la varianza: $se(\hat\beta_{educ})$ pasa de 0.0073 a 0.0089; $\sqrt{VIF_{educ}}=\sqrt{2.17}\approx 1.47$.
-\item \ldots pero el IC 95\% de $educ$ sigue lejos de 0 $\Rightarrow$ \alert{la pregunta sí se puede responder}.
-\item Donde estorba: separar IQ, KWW, meduc y feduc. Juntas: $F=5.42$ ($p<0.001$); $exper$, $exper^2$ y $age$: $F=5.47$ ($p=0.001$).
-\item \textbf{No} eliminamos controles para bajar un VIF: todos se justifican por teoría.
-\item Sensibilidad: sin age ni KWW, $\hat\beta_{educ}=0.048$; con componente principal, 0.047. Ambos dentro del IC: la conclusión es robusta.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Diagnóstico de supuestos}
-\begin{columns}[T]
-\column{0.6\textwidth}\centering\scriptsize\setlength{\tabcolsep}{3pt}
-\begin{tabular}{lll}
-\toprule
-Prueba & Resultado & Decisión \\
-\midrule
-Breusch--Pagan & LM $=$ 24.7, $p=$ 0.025 & Leve $\to$ EE HC1 \\
-White & $p=$ 0.050 & Rechaza apenas \\
-RESET & $p=$ 0.36 & Forma funcional OK \\
-Jarque--Bera & JB $=$ 132, $p<0.001$ & No normal; $n$ grande \\
-Cook máx. & 0.041 & Nadie domina \\
-Exogeneidad & No comprobable & $\Rightarrow$ asociación \\
-\bottomrule
-\end{tabular}
-\column{0.38\textwidth}
-\includegraphics[width=\linewidth]{residuos}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Conclusiones y limitaciones}
-\begin{enumerate}
-\item Un año más de escolaridad se asocia con $\approx$4\% más salario, comparando personas con igual habilidad medida y entorno (contra 6\% sin controles).
-\item La multicolinealidad es moderada: aumenta la varianza, pero no impide responder. Los VIF extremos eran un artificio del polinomio.
-\item \textbf{Limitaciones:} no es causal (habilidad medida con error, error de medición en educ); selección (solo empleados, 213 observaciones eliminadas); hombres de EE.\,UU. en 1980.
-\item \alert{¿Qué decisión de modelado cambia la conclusión?} Incluir o no la habilidad: 0.059 $\to$ 0.041. Quitar controles para bajar el VIF casi no la mueve.
-\end{enumerate}
-\end{frame}
-
-\begin{frame}{Reproducibilidad y fuentes}
-\begin{itemize}
-\item Repositorio: \texttt{github.com/ximeelaraa/mincer-multicolinealidad}
-\item Código: \texttt{scripts/analisis.py} y \texttt{multicolinealidad\_mincer.ipynb} (corre en Colab).
-\item Datos: \texttt{data/wage2\_muestra.csv} y \texttt{data/DICCIONARIO.md}.
-\end{itemize}
-\small
-Blackburn y Neumark (1992), \textit{QJE} 107(4) $\cdot$ Mincer (1974) $\cdot$ Wooldridge (2020) $\cdot$ Belsley, Kuh y Welsch (1980) $\cdot$ Galindo (2026), notas del curso, UP.
-\end{frame}
-
-\appendix
-\begin{frame}
-\centering\vfill
-{\Large\color{tinta}\textbf{Respaldo para preguntas}}\\[0.6em]
-Temas complementarios del curso aplicados a los mismos datos
-\vfill
-\end{frame}
-
-
-\begin{frame}{Respaldo: contenido}
-\begin{columns}[T]
-\column{0.5\textwidth}
-\begin{enumerate}
-\item Datos y pregunta
-\item Regresión lineal simple
-\item 4.1 Supuestos
-\item 4.2 Parámetros y formas funcionales
-\item 4.3 Prueba F y ANOVA
-\item 4.4 Dummies e interacciones
-\item 4.5 $R^2$ y $\bar R^2$
-\item 4.6 Precios hedónicos
-\item 4.7 Modelos no anidados
-\item 4.8 Regresión cuantílica
-\end{enumerate}
-\column{0.5\textwidth}
-\begin{enumerate}\setcounter{enumi}{10}
-\item 4.9 Aplicaciones financieras
-\item Multicolinealidad: diagnóstico
-\item Multicolinealidad: corrección
-\item MANOVA
-\item 5.1--5.2 Residuos
-\item 5.3--5.6 Heteroscedasticidad
-\item 5.7--5.10 Autocorrelación
-\item 5.11--5.12 Dinámica y rezagos
-\item 5.13 Jarque--Bera
-\item Predicción y conclusiones
-\end{enumerate}
-\end{columns}
-\end{frame}
-
-\section{Datos}
-\begin{frame}{Respaldo: bases de datos}
-\textbf{¿Cómo se asocia la escolaridad con el salario?} Los controles (experiencia, edad, habilidad,
-escolaridad de los padres) están muy correlacionados $\Rightarrow$ \alert{multicolinealidad}.
+\begin{frame}{El modelo}
 \[
-\ln w_i=\beta_0+\beta_1 educ_i+\beta_2 exper_i+\beta_3 exper_i^2+\beta_4 tenure_i+\dots+\varepsilon_i
+\color{azul}\ln(\text{salario})=\beta_0+\beta_1\,\text{escolaridad}+\text{experiencia}+\text{controles}+u
 \]
 \centering\small
 \begin{tabular}{lll}
 \toprule
-Base & Fuente & Uso \\
+\textbf{Grupo} & \textbf{Variables} & \textbf{Signo esperado}\\
 \midrule
-wage2 & Wooldridge (NLS 1980), $n=722$ & Base principal \\
-hprice1 & Wooldridge, 88 casas & 4.6 Hedónicos \\
-stocks & Plotly, semanal 2018--2019 & 4.9 Finanzas \\
-macrodata & statsmodels, 1959--2009 & 5.7--5.12 Series de tiempo \\
+De interés & escolaridad (educ) & $+$\\
+Experiencia & exper (centrada), exper$^2$, antigüedad, edad & $+$\\
+Habilidad & IQ, KWW (prueba de conocimiento laboral) & $+$\\
+Familia & escolaridad de la madre y del padre & $+$\\
+Dummies & casado, afroamericano, sur, urbano & $+\ -\ -\ +$\\
 \bottomrule
 \end{tabular}
-\end{frame}
 
-\section{Regresión lineal simple}
-\begin{frame}{Regresión lineal simple: $\ln w_i=\beta_0+\beta_1 educ_i+u_i$}
-\begin{columns}[T]
-\column{0.42\textwidth}\small
-\[\hat\beta_1=\frac{S_{xy}}{S_{xx}}=\frac{211.41}{3607.2}=0.0586\]
-\[\hat\beta_0=\bar y-\hat\beta_1\bar x=5.9991\]
-\begin{itemize}
-\item $se(\hat\beta_1)=0.00664$, \ $t=8.83$
-\item IC 95\%: $[0.0456,\ 0.0716]$
-\item $R^2=\hat\rho_{xy}^2=0.0977$
-\item $F_{1,720}=t^2=77.97$
-\item $\sum\hat u_i=0$, \ $\sum x_i\hat u_i=0$
-\end{itemize}
-\column{0.58\textwidth}
-\includegraphics[width=\linewidth]{simple_recta}\\[0.3em]
-\small +1 año $\Rightarrow$ \alert{+5.9\%} de salario (exacto 6.0\%), pero la educación sola explica sólo el 9.8\%.
-\end{columns}
-\end{frame}
-
-\begin{frame}{Regresión simple: propiedades}
-\begin{columns}[T]
-\column{0.45\textwidth}
-\includegraphics[width=\linewidth]{simple_scr}
-\column{0.55\textwidth}\small
-\begin{itemize}
-\item Superficie $SCR(b_0,b_1)$: mínimo en MCO. Elipse alargada porque $\mathrm{corr}(\hat\beta_0,\hat\beta_1)=-0.987$ ($\bar x$ lejos de 0).
-\item Dummy: en $\ln w\sim urban$, $\hat\beta_0=6.6521=\bar y_{rural}$ y $\hat\beta_1=0.2048=\bar y_{urb}-\bar y_{rural}$.
-\item Reescalar $x'=12\,educ$, $y'=w/1000$: la pendiente se multiplica por $c/b$ y $R^2$ no cambia.
-\item Sin las 10 observaciones más influyentes (Cook): $\hat\beta_1$ pasa de 0.0586 a 0.0601.
-\item Gauss--Markov (5{,}000 simulaciones): $\mathrm{Var}_{MCO}=4.4\times10^{-5}<\mathrm{Var}_{alt}=8.7\times10^{-5}$.
-\end{itemize}
-\end{columns}
-\end{frame}
-
-\section{4.1--4.3}
-\begin{frame}{4.1 Supuestos del modelo de regresión lineal múltiple}
-\centering\small
-\begin{tabular}{lll}
-\toprule
-Supuesto & ¿Se cumple? & Evidencia \\
-\midrule
-Linealidad en parámetros & Sí & RESET $p=0.36$ \\
-Rango completo & Falla con $age-educ-6$ & rango 3 de 4 \\
-$E(\varepsilon|X)=0$ & Dudoso sin habilidad & $\hat\beta_{educ}$: 0.078 $\to$ 0.041 \\
-Homoscedasticidad & Rechazada (leve) & BP $p=0.025$ \\
-No autocorrelación & No aplica (corte transversal) & DW depende del orden \\
-Normalidad & Rechazada; $n$ grande & JB $=132$ \\
-\bottomrule
-\end{tabular}
-\end{frame}
-
-\begin{frame}{4.2 Parámetros: formas funcionales e interpretación ceteris paribus}
-\centering\small
-\begin{tabular}{llrl}
-\toprule
-Forma & Modelo & $\hat\beta$ & Lectura \\
-\midrule
-Nivel--nivel & $w=\beta_0+\beta_1 educ$ & 58.59 & +1 año $\to$ +58.6 USD/mes \\
-Log--nivel & $\ln w=\beta_0+\beta_1 educ$ & 0.0586 & +1 año $\to$ +5.9\% \\
-Nivel--log & $w=\beta_0+\beta_1\ln educ$ & 816.28 & +1\% $\to$ +8.16 USD \\
-Log--log & $\ln w=\beta_0+\beta_1\ln educ$ & 0.821 & elasticidad 0.82 \\
-\bottomrule
-\end{tabular}
 \vspace{0.8em}
-\begin{itemize}\small
-\item Cada $\beta_j$ es un efecto parcial: compara trabajadores iguales en las demás regresoras.
-\item Si dos regresoras casi siempre se mueven juntas, hay poca información para separar sus efectos.
-\end{itemize}
+\scriptsize\color{gray} Estimación: MCO con errores robustos (HC1). Referencia: no casado, no afroamericano, fuera del sur, no urbano.
 \end{frame}
 
-\begin{frame}{4.3 ANOVA y prueba F global}
-\[F=\frac{(SSR_R-SSR_{NR})/q}{SSR_{NR}/(n-k-1)}\overset{H_0}{\sim}F_{q,\,n-k-1}\]
-\centering\small
-\begin{tabular}{lrrr}
-\toprule
-Fuente & SC & gl & CM \\
-\midrule
-Explicada (SSE) & 33.510 & 13 & 2.5777 \\
-Residual (SSR) & 93.302 & 708 & 0.1318 \\
-Total (SST) & 126.812 & 721 &  \\
-\bottomrule
-\end{tabular}
-\vspace{0.6em}
-
-$F=19.56>F_{0.05;\,13,\,708}=1.734$ $\Rightarrow$ el modelo es globalmente significativo.
-\end{frame}
-
-\begin{frame}{4.3 Pruebas F de restricciones}
-\centering\scriptsize
-\begin{tabular}{lrrrrl}
-\toprule
-$H_0$ & $q$ & $F$ & $F_{0.05}$ & $p$ & Decisión \\
-\midrule
-$\beta_{IQ}=\beta_{KWW}=\beta_{meduc}=\beta_{feduc}=0$ & 4 & 5.416 & 2.385 & $<0.001$ & Rechaza \\
-$\beta_{exper}=\beta_{exper^2}=\beta_{age}=0$ & 3 & 5.475 & 2.617 & 0.001 & Rechaza \\
-$\beta_{south}=\beta_{urban}=0$ & 2 & 21.282 & 3.008 & $<0.001$ & Rechaza \\
-$\beta_{age}=0$ & 1 & 1.110 & 3.855 & 0.293 & No rechaza \\
-$\beta_{meduc}=\beta_{feduc}$ & 1 & 0.032 & 3.855 & 0.857 & No rechaza \\
-\bottomrule
-\end{tabular}
-\vspace{0.5em}
-
-\includegraphics[height=0.42\textheight]{regiones_rechazo}
-
-\small $age$ sola no es significativa ($F=t^2=1.11$), pero $\{exper, exper^2, age\}$ \alert{sí lo es en conjunto}.
-\end{frame}
-
-\section{4.4--4.7}
-\begin{frame}{4.4 Dummies e interacciones}
-\[\ln w=\beta_0+\beta_1 educ+\dots+\delta\,black+\gamma\,(educ\times black)+\varepsilon\]
-\begin{itemize}
-\item Bases: no casado, no negro, fuera del sur, rural. Efecto exacto $100(e^{\beta}-1)$.
-\item Casado: \alert{+21.9\%}; urbano: \alert{+20.8\%}; sur: $-$7.1\%.
-\item Pendiente de educación: grupo base 0.0541; negros $\beta_1+\gamma=0.0296$ ($\gamma$: $p=0.34$).
-\item $\delta$ sola es la diferencia sólo si $educ=0$; con 12 años: $\delta+12\gamma=$-$0.090$.
-\item \textbf{Trampa de las dummies}: constante $+$ urban $+$ rural $\Rightarrow$ rango 3 de 4 (colinealidad perfecta).
-\end{itemize}
-\end{frame}
-
-\begin{frame}{4.5 $R^2$ y $R^2$ ajustada \quad\textbar\quad 4.6 Precios hedónicos}
-\begin{columns}[T]
-\column{0.45\textwidth}\centering\small
-\begin{tabular}{lrrr}
-\toprule
-Modelo & $k$ & $R^2$ & $\bar R^2$ \\
-\midrule
-Completo & 13 & 0.2778 & 0.2633 \\
-+ sibs & 14 & 0.2780 & 0.2624 \\
-+ sibs + brthord & 15 & 0.2802 & 0.2635 \\
-+ hours & 14 & 0.2897 & 0.2743 \\
-\bottomrule
-\end{tabular}\\[0.5em]
-\raggedright Agregar \texttt{sibs} sube $R^2$ pero baja $\bar R^2$.
-\column{0.55\textwidth}\small
-\textbf{hprice1} (88 casas):
-\[\ln P=\beta_0+\beta_1\ln lot+\beta_2\ln sqrft+\beta_3 bdrms+\beta_4 colonial\]
-\begin{itemize}
-\item Elasticidad precio--superficie: 0.707 ($p<0.001$).
-\item Recámaras: 0.027 ($p=0.35$): con la misma superficie no agregan valor.
-\item Con el avalúo: VIF de $\ln sqrft$ 1.48 $\to$ 5.10; $se$ 0.093 $\to$ 0.138.
-\end{itemize}
+\begin{frame}{Resultado principal}
+\begin{columns}[c]
+\column{0.62\textwidth}
+\includegraphics[width=\linewidth]{pasos_educ}
+\column{0.36\textwidth}
+{\LARGE\color{tinta}\textbf{6.0\,\% $\to$ 4.2\,\%}}\\[0.6em]
+Al comparar personas con igual habilidad y familia, la asociación baja casi a la mitad.
 \end{columns}
+\mensaje{Parte de lo que parecía «escuela» era habilidad: sesgo por variable omitida}
 \end{frame}
 
-\begin{frame}{4.7 Modelos no anidados}
-A: controles $+$ habilidad (IQ, KWW) \qquad B: controles $+$ familia (meduc, feduc)
+\begin{frame}{¿Qué significa?}
 \vspace{0.5em}
-\centering\small
+\dato{$+$4.2\,\%}{de salario por un año más de escuela ($\approx$ 41 USD al mes)}\hfill
+\dato{2--6\,\%}{intervalo de confianza 95\,\%: no incluye 0 $\to$ se rechaza $H_0$}\hfill
+\dato{$+$18\,\%}{con 4 años de universidad: relevante, no solo significativo}
+\vspace{1.5em}
+
+Otros: casado +22\,\% $\cdot$ urbano +20\,\% $\cdot$ sur $-$7\,\% $\cdot$ IQ: $+$5\,\% por desviación estándar.
+\mensaje{Todo «manteniendo constantes las demás variables»}
+\end{frame}
+
+\begin{frame}{Multicolinealidad: ¿dónde está?}
+\begin{columns}[c]
+\column{0.6\textwidth}
+\includegraphics[width=\linewidth]{vif}
+\column{0.38\textwidth}
+{\color{naranja}\textbf{VIF de 24: artificio}}\\ exper$^2$ se construye con exper.\\ Al centrar: VIF máx.\ 2.2.\\[1em]
+{\color{azul}\textbf{Real pero moderada:}}\\ escolaridad $\leftrightarrow$ IQ $\leftrightarrow$ KWW $\leftrightarrow$ padres (VIF 1.6--2.2).
+\end{columns}
+\mensaje{Un VIF alto no se arregla quitando variables: primero hay que entender de dónde viene}
+\end{frame}
+
+\begin{frame}{¿Nos impide responder?}
+\vspace{0.5em}
+\dato[naranja]{$\times$1.5}{error estándar de escolaridad inflado por la correlación}\hfill
+\dato{$F=5.4$}{IQ, KWW y padres: solos no significativos, juntos sí ($p<0.001$)}\hfill
+\dato{4.8--4.9\,\%}{si quitamos o combinamos controles (vs 4.2\,\%): casi igual}
+\mensaje{No: el intervalo de escolaridad sigue lejos de cero. Solo cuesta separar los controles entre sí}
+\end{frame}
+
+\begin{frame}{¿Se cumplen los supuestos?}
+\centering
 \begin{tabular}{lll}
 \toprule
- & A (habilidad) & B (familia) \\
+\textbf{Revisión} & \textbf{Resultado} & \textbf{Qué hicimos}\\
 \midrule
-AIC & 599.7 & 609.1 \\
-BIC & 650.1 & 659.5 \\
-$\bar R^2$ & 0.2476 & 0.2378 \\
-Prueba J & $\hat y_B$ en A: $t=2.21$, $p=0.028$ & $\hat y_A$ en B: $t=3.77$, $p<0.001$ \\
+Varianza constante (Breusch--Pagan) & $p=0.025$ $\to$ no & Errores robustos HC1\\
+Forma funcional (RESET) & $p=0.36$ $\to$ bien & Nada\\
+Normalidad (Jarque--Bera) & $p<0.001$ $\to$ no & Con $n=722$ no afecta\\
+Exogeneidad & No se puede probar & Hablamos de asociación\\
 \bottomrule
 \end{tabular}
-\vspace{0.6em}
-\begin{itemize}\small
-\item AIC, BIC y $\bar R^2$ prefieren A.
-\item La prueba J de Davidson--MacKinnon rechaza en \alert{ambas} direcciones: ninguno abarca al otro $\Rightarrow$ combinarlos\ldots\ y aparece la multicolinealidad.
-\end{itemize}
+\mensaje{Ningún problema cambia la conclusión}
 \end{frame}
 
-\section{4.8--4.9}
-\begin{frame}{4.8 Regresión cuantílica: $Q_\tau(\ln w\mid X)=X'\beta_\tau$}
-\begin{columns}[T]
-\column{0.55\textwidth}
-\includegraphics[width=\linewidth]{cuantilica}
-\column{0.45\textwidth}\centering\small
-\begin{tabular}{rrrr}
-\toprule
-$\tau$ & $\hat\beta_{educ}$ & ee & IC 95\% \\
-\midrule
-0.1 & 0.0431 & 0.0145 & [0.015, 0.072] \\
-0.25 & 0.0476 & 0.0095 & [0.029, 0.066] \\
-0.5 & 0.0529 & 0.0083 & [0.037, 0.069] \\
-0.75 & 0.0470 & 0.0089 & [0.030, 0.064] \\
-0.9 & 0.0600 & 0.0119 & [0.037, 0.083] \\
-\bottomrule
-\end{tabular}\\[0.6em]
-\raggedright MCO: 0.0529. El retorno va de 4.3\% a 6.0\%, pero los IC se traslapan: heterogeneidad moderada.
-\end{columns}
-\end{frame}
-
-\begin{frame}{4.9 Aplicaciones financieras: beta de mercado de AAPL}
-\begin{columns}[T]
-\column{0.55\textwidth}
-\includegraphics[width=\linewidth]{capm}
-\column{0.45\textwidth}\small
-Rendimientos log semanales 2018--2019, $n=104$.
-\begin{itemize}
-\item $\hat\beta=0.783$, IC 95\% $[0.600,\ 0.966]$
-\item $\hat\alpha=0.0022$ ($p=0.44$): sin alfa
-\item BP $p=0.098$; BG(4) $p=0.82$
-\item JB $p<0.001$: colas pesadas
-\item AAPL $\sim$ MSFT $+$ AMZN $+$ GOOG: $F=14.62$ ($p<0.001$), pero sólo MSFT es significativa: acciones correlacionadas.
-\end{itemize}
-\end{columns}
-\end{frame}
-
-\section{Multicolinealidad}
-\begin{frame}{Multicolinealidad: perfecta vs imperfecta}
-\textbf{Perfecta:} experiencia potencial $pexper=age-educ-6$. Con constante, $educ$, $age$ y $pexper$:
-rango$(X)=3<4$, $\kappa(X'X)\approx 9.6\times10^{16}$ $\Rightarrow$ $(X'X)^{-1}$ no existe.
-\vspace{1em}
-
-\textbf{Imperfecta} (modelo completo, 13 regresores):
-\vspace{0.6em}
-
-\centering
-\dato{24}{VIF máximo ($exper^2$)}\hfill
-\dato{77}{número de condición (BKW) $>30$}\hfill
-\dato{4140}{$\chi^2$ Farrar--Glauber (crítico 99.6)}
-\vspace{1em}
-
-\raggedright\small
-$t$ individuales: $exper$ 1.09, $exper^2$ $-$0.22, $age$ 1.05 \ldots\ pero $F$ conjunta $=5.47$ ($p=0.001$).
-\end{frame}
-
-\begin{frame}{Correlaciones, VIF, tolerancia y regla de Klein}
-\begin{columns}[T]
-\column{0.5\textwidth}
-\includegraphics[width=\linewidth]{correlaciones}
-\column{0.5\textwidth}\centering\scriptsize
-$VIF_j=\dfrac{1}{1-R_j^2}$, \quad $Tol_j=1-R_j^2$
-\vspace{0.3em}
-
-\begin{tabular}{lrrr}
-\toprule
-Variable & VIF & Tol. & $R_j^2$ \\
-\midrule
-exper$^2$ & 24.01 & 0.042 & 0.958 \\
-exper & 21.08 & 0.047 & 0.953 \\
-educ & 2.17 & 0.461 & 0.539 \\
-age & 2.07 & 0.483 & 0.517 \\
-KWW & 1.74 & 0.575 & 0.425 \\
-IQ & 1.73 & 0.577 & 0.423 \\
-feduc & 1.69 & 0.590 & 0.410 \\
-meduc & 1.58 & 0.631 & 0.369 \\
-black & 1.23 & 0.815 & 0.185 \\
-tenure & 1.16 & 0.863 & 0.137 \\
-south & 1.10 & 0.913 & 0.087 \\
-urban & 1.06 & 0.945 & 0.055 \\
-married & 1.04 & 0.965 & 0.035 \\
-\bottomrule
-\end{tabular}\\[0.3em]
-Klein: $R_j^2>R^2=0.264$ en 8 de 13 regresores.
-\end{columns}
-\end{frame}
-
-\begin{frame}{Autovalores, número de condición y Farrar--Glauber}
-\begin{itemize}
-\item Regresoras estandarizadas: $\lambda_{\max}=3.273$, $\lambda_{\min}=0.0226$ $\Rightarrow$ $\kappa=\sqrt{\lambda_{\max}/\lambda_{\min}}=12.04$.
-\item Columnas normalizadas con constante (Belsley--Kuh--Welsch): número de condición $=77.3$ $>30$ (severa).
-\item Farrar--Glauber: $\chi^2=-\left[n-1-\frac{2k+5}{6}\right]\ln|R|$, con $|R|=0.0031$: $\chi^2=4140>\chi^2_{0.05;\,78}=99.6$ $\Rightarrow$ se rechaza ortogonalidad.
-\item Síntoma clásico: $se(\hat\beta_{educ})$ sube de 0.0073 (base) a 0.0089 (completo).
-\item \alert{MCO sigue siendo MELI}: la multicolinealidad no sesga, vuelve imprecisos los estimadores.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Corrección: centrar, eliminar/combinar, PCA y Ridge}
-\begin{columns}[T]
-\column{0.5\textwidth}
-\includegraphics[width=\linewidth]{vif}
-\column{0.5\textwidth}
-\includegraphics[width=\linewidth]{ridge}
-\end{columns}
-\small
-\begin{itemize}
-\item Centrar: $\mathrm{corr}(exper,exper^2)$ 0.975 $\to$ 0.054; VIF máx 24.0 $\to$ 2.17, mismo $R^2$.
-\item Eliminar $age$ y promediar padres (prueba $F$ de $\beta_{meduc}=\beta_{feduc}$: $p=0.86$). PCA: CP1 $=52\%$ de la varianza. Ridge: $\lambda\approx 99$.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Comparación de especificaciones}
-\begin{columns}[T]
-\column{0.60\textwidth}\centering\footnotesize\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lrrrrrr}
-\toprule
-Modelo & $\hat\beta_{educ}$ & ee & $\bar R^2$ & BIC & VIF máx & $k$ \\
-\midrule
-Base & 0.0783 & 0.0073 & 0.1373 & 709.8 & 20.4 & 3 \\
-Completo & 0.0408 & 0.0089 & 0.2507 & 663.8 & 24.0 & 13 \\
-Centrado & 0.0408 & 0.0089 & 0.2507 & 663.8 & 2.2 & 13 \\
-Reducido & 0.0479 & 0.0082 & 0.2492 & 648.5 & 1.8 & 10 \\
-PCA & 0.0468 & 0.0083 & 0.2507 & 641.6 & 1.9 & 9 \\
-\bottomrule
-\end{tabular}
-\column{0.38\textwidth}
-\includegraphics[width=\linewidth]{educ}
-\end{columns}
-\vspace{0.5em}
-\small La caída de $\hat\beta_{educ}$ (base $\to$ completo) es \alert{sesgo por variable omitida} (habilidad); la multicolinealidad se nota en el error estándar.
-\end{frame}
-
-\section{MANOVA y 5.1--5.6}
-\begin{frame}{MANOVA \quad\textbar\quad 5.1--5.2 Distribución de los residuos}
-\begin{columns}[T]
-\column{0.4\textwidth}\small
-\textbf{MANOVA}: ¿difieren $(educ, IQ, KWW)$ entre el sur y el resto?
-\begin{itemize}
-\item Wilks $\Lambda=0.9737$
-\item Pillai $=0.0263$
-\item $F(3,718)=6.46$, $p<0.001$
-\end{itemize}
-MANOVA trata varias $Y$; \alert{no} diagnostica multicolinealidad (propiedad de las columnas de $X$).
-\vspace{0.5em}
-
-\textbf{Residuos}: sin curvatura ni abanico marcado; cola izquierda pesada; Cook máx $=0.041$.
-\column{0.6\textwidth}
-\includegraphics[width=\linewidth]{residuos}
-\end{columns}
-\end{frame}
-
-\begin{frame}{5.3--5.6 Heteroscedasticidad: Breusch--Pagan paso a paso}
+\begin{frame}{Conclusiones}
+\Large
 \begin{enumerate}
-\item Estimar el modelo preferido por MCO y obtener $\hat\varepsilon_i$.
-\item Regresión auxiliar de $\hat\varepsilon_i^2$ sobre las $q=13$ regresoras: $R^2_{aux}=0.0342$.
-\item $LM=nR^2_{aux}=722\times0.0342=24.68$.
-\item $LM>\chi^2_{0.05;\,13}=22.36$ ($p=0.025$) $\Rightarrow$ \alert{se rechaza homoscedasticidad}.
+\item Un año más de escuela $\leftrightarrow$ $+$4.2\,\% de salario entre personas comparables.
+\item La multicolinealidad infla la varianza, pero no impide responder.
+\item Limitaciones: no es causal $\cdot$ posible selección $\cdot$ solo hombres de EE.\,UU. en 1980.
 \end{enumerate}
+\normalsize
+\mensaje{¿Qué cambiaría la conclusión? Incluir o no la habilidad: 6.0\,\% $\to$ 4.2\,\%}
+\end{frame}
+
+\begin{frame}{Gracias $\cdot$ ¿preguntas?}
+\vspace{1.5em}
 \begin{itemize}
-\item White: $p=0.050$ (rechaza apenas; menos potencia por los muchos términos).
-\item Errores HC0--HC3 casi iguales a los clásicos; WLS/FGLS: $\hat\beta_{educ}=0.0445$.
-\item Los coeficientes MCO no cambian con errores robustos: sólo cambia su incertidumbre.
+\item Código, datos y diccionario: \texttt{github.com/ximeelaraa/mincer-multicolinealidad}
+\item Fuentes: Blackburn y Neumark (1992) $\cdot$ Mincer (1974) $\cdot$ Wooldridge (2020) $\cdot$ Galindo (2026)
 \end{itemize}
 \end{frame}
-
-\begin{frame}{Modelo preferido con errores robustos (HC1)}
-\centering\tiny
-\begin{tabular}{lrrrr}
-\toprule
-Variable & $\hat\beta$ & ee HC1 & $p$ & Efecto \% exacto \\
-\midrule
-educ & 0.0408 & 0.0097 & $<0.001$ & 4.17 \\
-exper$_c$ & 0.0126 & 0.0046 & 0.007 & 1.27 \\
-exper$_c^2$ & -0.0001 & 0.0007 & 0.833 & $-$0.01 \\
-tenure & 0.0079 & 0.0030 & 0.009 & 0.79 \\
-age & 0.0066 & 0.0064 & 0.302 & 0.67 \\
-IQ & 0.0037 & 0.0011 & 0.001 & 0.37 \\
-KWW & 0.0029 & 0.0027 & 0.281 & 0.29 \\
-meduc & 0.0076 & 0.0059 & 0.197 & 0.76 \\
-feduc & 0.0058 & 0.0055 & 0.287 & 0.58 \\
-married & 0.1949 & 0.0431 & $<0.001$ & 21.51 \\
-black & -0.0773 & 0.0498 & 0.121 & $-$7.44 \\
-south & -0.0679 & 0.0327 & 0.038 & $-$6.56 \\
-urban & 0.1796 & 0.0307 & $<0.001$ & 19.67 \\
-\bottomrule
-\end{tabular}
-\vspace{0.5em}
-
-\small $n=722$, $R^2=0.264$. Variable dependiente: $\ln w$. Referencia: no casado, no afroamericano, fuera del sur, no urbano.
-\end{frame}
-
-\section{5.7--5.13}
-\begin{frame}{5.7--5.10 Autocorrelación: Durbin--Watson, Breusch--Godfrey y HAC}
-\includegraphics[width=\linewidth]{autocorrelacion}
-\small
-\begin{itemize}
-\item wage2: DW $=1.860$ y $1.994$ al reordenar filas $\Rightarrow$ no aplica en corte transversal.
-\item Consumo (macrodata, $n=203$), $\ln c=\alpha+\beta\ln y$: $R^2=0.9984$, DW $=0.188\approx2(1-\hat\rho)$ con $\hat\rho=0.906$; BG(4) $=167.8$.
-\item $se$ HAC (Newey--West) $=0.0067$ vs clásico 0.0029: la inferencia clásica subestima la incertidumbre.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{5.11--5.12 Modelos dinámicos y rezagos}
-\[\ln c_t=\alpha+\phi\ln c_{t-1}+\beta_0\ln y_t+\beta_1\ln y_{t-1}+u_t\]
-\begin{columns}[T]
-\column{0.5\textwidth}\small
-\begin{itemize}
-\item $\hat\phi=0.9539$ ($|\phi|<1$: estable)
-\item $\hat\beta_0=0.3450$, \ $\hat\beta_1=$-$0.2989$
-\item Largo plazo: $\dfrac{\beta_0+\beta_1}{1-\phi}=0.999\approx1$
-\item $\mathrm{corr}(\ln y_t,\ln y_{t-1})=0.9998$: VIF $>3{,}000$ (\alert{multicolinealidad entre rezagos})
-\item BG(4) aún rechaza: más dinámica o HAC
-\end{itemize}
-\column{0.5\textwidth}\centering\scriptsize
-Rezagos distribuidos: $\Delta\ln c_t$ sobre $\Delta\ln y_{t-j}$\\[0.3em]
-\begin{tabular}{rrrrr}
-\toprule
-$p$ & AIC & BIC & $\sum\beta$ & $\bar R^2$ \\
-\midrule
-0 & 379.6 & 386.2 & 0.342 & 0.190 \\
-1 & 355.8 & 365.7 & 0.602 & 0.285 \\
-2 & 356.0 & 369.2 & 0.660 & 0.288 \\
-3 & 353.6 & 370.0 & 0.746 & 0.300 \\
-4 & 355.6 & 375.3 & 0.744 & 0.296 \\
-\bottomrule
-\end{tabular}\\[0.3em]
-\small BIC elige 1 rezago; AIC elige 3.
-\end{columns}
-\end{frame}
-
-\begin{frame}{5.13 Jarque--Bera y resumen de diagnósticos}
-\[JB=\frac{n}{6}\left(S^2+\frac{(K-3)^2}{4}\right)=\frac{722}{6}\left((-0.326)^2+\frac{(4.994-3)^2}{4}\right)=132.4>\chi^2_{0.05;2}=5.99\]
-\centering\small
-\begin{tabular}{llll}
-\toprule
-Prueba & Estadístico & $p$ & Conclusión (5\%) \\
-\midrule
-Breusch--Pagan & LM $=$ 24.68 & 0.025 & Rechaza homoscedasticidad \\
-White & LM $=$ 123.27 & 0.050 & Rechaza apenas \\
-RESET & F $=$ 1.029 & 0.358 & No rechaza \\
-Jarque--Bera & JB $=$ 132.4 & $<0.001$ & Rechaza normalidad \\
-DW (consumo) & DW $=$ 0.188 & -- & $\rho>0$ fuerte \\
-BG(4) (consumo) & LM $=$ 167.8 & $<0.001$ & Autocorrelación \\
-BG(4) (ARDL) & LM $=$ 24.3 & $<0.001$ & Aún rechaza \\
-\bottomrule
-\end{tabular}
-\vspace{0.4em}
-
-\raggedright Rechazar normalidad con $n=722$ no implica sesgo: la inferencia es válida asintóticamente.
-\end{frame}
-
-\section{Cierre}
-\begin{frame}{Inferencia vs predicción}
-\begin{columns}[T]
-\column{0.5\textwidth}\centering
-\begin{tabular}{lrr}
-\toprule
-Modelo & $R^2$ prueba & RMSE \\
-\midrule
-Base & 0.0405 & 0.3705 \\
-Completo & 0.2239 & 0.3332 \\
-Reducido & 0.2215 & 0.3338 \\
-Ridge & 0.2504 & 0.3275 \\
-\bottomrule
-\end{tabular}
-\column{0.5\textwidth}
-\begin{itemize}
-\item Completo $\approx$ reducido fuera de muestra.
-\item La multicolinealidad daña la \alert{interpretación}, no la predicción.
-\item Ridge: menor RMSE a cambio de sesgo (no reporta $p$-values).
-\end{itemize}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Respaldo: conclusiones de los temas complementarios}
-\begin{enumerate}
-\item Asociación educación--salario robusta: 5.9\% (simple) $\to\approx$4.1\% con habilidad (sesgo por variable omitida).
-\item Perfecta: no hay MCO único. Imperfecta: MCO sigue siendo MELI, pero las varianzas se inflan.
-\item VIF, tolerancia, Klein, autovalores, número de condición y Farrar--Glauber señalan $exper$, $exper^2$ y $age$.
-\item La $F$ conjunta revela lo que las $t$ individuales no pueden.
-\item Centrar corrige la colinealidad del polinomio; combinar, PCA o Ridge sólo como sensibilidad.
-\item Heteroscedasticidad leve (HC1); no normalidad irrelevante con $n$ grande; en series de tiempo, dinámica o HAC.
-\item La misma lección aparece en hedónicos, finanzas y rezagos.
-\end{enumerate}
-\end{frame}
-
-\begin{frame}{Referencias}
-\small
-\begin{itemize}
-\item Belsley, Kuh y Welsch (1980). \textit{Regression Diagnostics}. Wiley.
-\item Davidson y MacKinnon (1981). \textit{Econometrica}, 49(3), 781--793.
-\item Farrar y Glauber (1967). \textit{Review of Economics and Statistics}, 49(1), 92--107.
-\item Galindo, C. (2026). Notas de regresión lineal, pruebas $t$ y $F$, inferencia y diagnóstico. Universidad Panamericana.
-\item Koenker y Bassett (1978). Regression quantiles. \textit{Econometrica}, 46(1), 33--50.
-\item Mincer, J. (1974). \textit{Schooling, Experience, and Earnings}. NBER.
-\item Wooldridge, J. M. (2020). \textit{Introducción a la econometría} (7.\textsuperscript{a} ed.). Cengage.
-\end{itemize}
-\end{frame}
-
 \end{document}

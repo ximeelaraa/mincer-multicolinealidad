@@ -1,0 +1,26 @@
+{
+ "guion": {
+  "pregunta": "Quien estudia más gana más, pero también suele tener más habilidad y padres más educados. Queremos saber cuánto del salario se asocia con la escuela comparando personas parecidas en todo lo demás, y si la multicolinealidad entre esos controles nos impide medirlo. Fijamos alfa = 5 % antes de estimar. Es asociación, no causalidad.",
+  "datos": "Usamos la base WAGE2 de Wooldridge, que viene de una encuesta real de EE. UU. de 1980. Eran 935 hombres; quitamos 213 sin escolaridad de los padres y quedaron 722. El salario es mensual en dólares de 1980 y lo usamos en logaritmo para leer los coeficientes como porcentajes.",
+  "modelo": "Es una ecuación de Mincer: logaritmo del salario contra escolaridad y experiencia, más controles de habilidad (IQ y KWW), de familia (escolaridad de los padres) y dummies. Esperamos signo positivo en escolaridad. Usamos errores robustos HC1.",
+  "resultado": "Este es el resultado central. Solo con escolaridad: 6.0 %. Al agregar experiencia sube a 8.1 %, porque quien estudia más tiene menos años trabajando. Al agregar habilidad y familia baja a 4.2 %: parte de lo que parecía escuela era habilidad. Eso es sesgo por variable omitida.",
+  "interpretacion": "Comparando a dos hombres iguales en todo menos en un año de escuela, el que estudió más gana en promedio 4.2 % más, unos 41 dólares al mes. El intervalo va de 2.2 a 6.2 %, no incluye el cero: rechazamos H0. Y es relevante: cuatro años de universidad son 18 % más.",
+  "multi": "La experiencia y su cuadrado tenían VIF de 21 y 24, pero era un artificio: una variable es el cuadrado de la otra. Al centrar la experiencia, el VIF máximo bajó a 2.2 sin cambiar nada más. La multicolinealidad real está entre escolaridad, IQ, KWW y los padres, y es moderada.",
+  "impide": "La multicolinealidad hace el error estándar de escolaridad 1.47 veces más grande, pero el intervalo sigue lejos de cero: sí podemos responder. Donde estorba es para separar IQ, KWW y padres entre sí: por separado no salen significativos, pero juntos sí (F = 5.4). No quitamos variables para bajar el VIF; al probarlo, el resultado casi no cambia.",
+  "diagnostico": "Revisamos los supuestos. Hay heteroscedasticidad leve, por eso usamos errores robustos. Los residuos no son normales, pero con 722 observaciones no importa. La forma funcional está bien según RESET.",
+  "conclusion": "Un año más de escuela se asocia con 4.2 % más salario entre personas comparables. La multicolinealidad infla la varianza pero no impide responder. Limitaciones: no es causal, puede haber selección y solo aplica a hombres de EE. UU. en 1980. Lo que más cambia la conclusión es incluir o no la habilidad.",
+  "cierre": "Todo es reproducible: el código, los datos y el diccionario están en GitHub. Gracias, ¿preguntas?"
+ },
+ "quien": {
+  "pregunta": "Ximena",
+  "datos": "Ximena",
+  "modelo": "Ximena",
+  "resultado": "Camila",
+  "interpretacion": "Camila",
+  "multi": "Camila",
+  "impide": "Sara",
+  "diagnostico": "Sara",
+  "conclusion": "Sara",
+  "cierre": "Sara"
+ }
+}

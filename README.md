@@ -13,10 +13,11 @@ Proyecto de **Fundamentos de Econometría** (Universidad Panamericana, Prof. Cé
 | 1. **Informe** (5–8 páginas) | [`Informe_Proyecto_Econometria.pdf`](Informe_Proyecto_Econometria.pdf) (7 páginas) · [`.docx`](Informe_Proyecto_Econometria.docx) |
 | 2. **Anexo reproducible** | [`multicolinealidad_mincer.ipynb`](multicolinealidad_mincer.ipynb) (corre en Colab) · [`scripts/`](scripts/) · sección *Cómo reproducir* (abajo) |
 | 3. **Datos documentados** | [`data/wage2_muestra.csv`](data/wage2_muestra.csv) (archivo utilizado) · [`data/DICCIONARIO.md`](data/DICCIONARIO.md) (fuente, fecha de consulta, diccionario y transformaciones) |
-| 4. **Presentación** (8 min + 4 de preguntas) | [`Presentacion_Beamer.pdf`](Presentacion_Beamer.pdf) · [`Presentacion_Multicolinealidad_Mincer.pdf`](Presentacion_Multicolinealidad_Mincer.pdf) (PowerPoint, [`.pptx`](Presentacion_Multicolinealidad_Mincer.pptx)) |
+| 4. **Presentación** (8 min + 4 de preguntas) | **[`Presentacion_Beamer.pdf`](Presentacion_Beamer.pdf)** (11 diapositivas, la que se proyecta) · versión editable idéntica: [`Presentacion_Final.pptx`](Presentacion_Final.pptx) / [`.pdf`](Presentacion_Final.pdf), con el guion en las notas del orador |
 | Material complementario | [`Anexo_Tecnico_Temas_del_Curso.pdf`](Anexo_Tecnico_Temas_del_Curso.pdf): el resto de los temas del parcial aplicados a los mismos datos |
+| Para estudiar (no se entrega) | [`Guia_de_Estudio_y_Exposicion.pdf`](Guia_de_Estudio_y_Exposicion.pdf): explicación simple, conceptos, números clave, guion por diapositiva y preguntas probables |
 
-Las dos presentaciones tienen **11 diapositivas principales** para los 8 minutos y, después de la diapositiva *Respaldo para preguntas*, diapositivas extra para la ronda de preguntas. [`Beamer_Overleaf.zip`](Beamer_Overleaf.zip) trae el `.tex` y sus figuras, listo para Overleaf.
+La presentación tiene **11 diapositivas** para los 8 minutos (unos 45 segundos cada una). [`Beamer_Overleaf.zip`](Beamer_Overleaf.zip) trae el `.tex` y sus figuras, listo para Overleaf.
 
 ## Lista de verificación de la guía
 - [x] La pregunta y la unidad de análisis son explícitas (informe, secciones 1 y 3).
@@ -51,7 +52,9 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 MPLBACKEND=Agg python scripts/analisis.py      # figuras, resultados.json y data/wage2_muestra.csv
 python scripts/generar_informe.py              # informe (Word)
-python scripts/generar_entregables.py          # anexo técnico, PowerPoint y Beamer
+python scripts/generar_entregables.py          # anexo técnico (Word)
+python scripts/generar_presentacion.py         # presentación (PowerPoint y Beamer)
+python scripts/generar_guia.py                 # guía de estudio (Word)
 jupytext --to ipynb --output multicolinealidad_mincer.ipynb scripts/analisis.py   # notebook
 ```
 En **Google Colab**, sube el `.ipynb` y ejecútalo; la primera celda instala `wooldridge`.
