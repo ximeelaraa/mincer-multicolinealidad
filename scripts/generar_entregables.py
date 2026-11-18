@@ -20,14 +20,18 @@ from pptx.util import Inches as PI, Pt as PPt
 ROOT = Path(__file__).resolve().parent.parent
 FIG = ROOT / "figuras"
 R = json.loads((ROOT / "resultados.json").read_text())
-AUTORA, CURSO, FECHA = "Ximena Lara", "Fundamentos de Econometría", "Noviembre 2026"
+EQUIPO = "Ximena Lara, Camila Ricardi y Sara Enriquez"
+AUTORA, CURSO, FECHA = EQUIPO, "Fundamentos de Econometría · Prof. César Galindo · Universidad Panamericana", "Noviembre 2026"
 
 S, F_, A = R["simple"], R["full"], R["anova"]
 C, VF, H, D = R["comparacion"], R["vif_full"], R["hetero"], R["dummies"]
 PF = R["pruebas_F"]
 FG, FIN, AC, ARDL, REZ = R["farrar"], R["finanzas"], R["autocorr"], R["ardl"], R["rezagos"]
 JB, HED, NA, Q = R["jb"], R["hedonico"], R["no_anidados"], R["cuantil"]
-RED = R["reducido"]
+RED = R["preferido"]  # modelo preferido: todos los controles, experiencia centrada
+TP = R["tabla_principal"]
+M1, M2, M3 = TP["(1) Simple"], TP["(2) Mincer"], TP["(3) Preferido"]
+WH = "Rechaza apenas" if H["white_p"] < .05 else "No rechaza"
 n = R["n"]
 pct = lambda b: 100 * (np.exp(b) - 1)
 p3 = lambda p: "<0.001" if p < 0.001 else f"{p:.3f}"
@@ -57,7 +61,7 @@ T_formas = pd.DataFrame([{"Forma": f["forma"], "β̂": f"{f['beta']:.4f}", "R²"
 
 T_diag = pd.DataFrame([
     ["Breusch–Pagan (wage2)", f"LM = {H['LM']:.2f}", p3(H["bp_p"]), "Rechaza homoscedasticidad"],
-    ["White (wage2)", f"LM = {H['white_LM']:.2f}", p3(H["white_p"]), "No rechaza"],
+    ["White (wage2)", f"LM = {H['white_LM']:.2f}", p3(H["white_p"]), WH],
     ["RESET (wage2)", f"F = {R['reset']['F']:.3f}", p3(R["reset"]["p"]), "No rechaza"],
     ["Jarque–Bera (wage2)", f"JB = {JB['JB']:.1f}", p3(JB["p"]), "Rechaza normalidad"],
     ["Durbin–Watson (consumo estático)", f"DW = {AC['dw']:.3f}", "—", "Autocorrelación positiva"],
@@ -119,20 +123,22 @@ for s_ in doc.sections:
     s_.left_margin = s_.right_margin = Inches(1)
 for _ in range(6):
     doc.add_paragraph()
-for txt, sz, b in [("Multicolinealidad en la ecuación de salarios de Mincer", 22, True),
-                   ("Regresión lineal simple y múltiple, inferencia y diagnóstico con datos reales", 13, False)]:
+for txt, sz, b in [("Anexo técnico: temas complementarios del curso", 22, True),
+                   ("Multicolinealidad en la ecuación de salarios de Mincer · regresión simple y múltiple, inferencia y diagnóstico con datos reales", 13, False)]:
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r_ = p.add_run(txt)
     r_.bold, r_.font.size = b, Pt(sz)
 for _ in range(4):
     doc.add_paragraph()
-for line in (AUTORA, CURSO, FECHA):
+for line in ("Equipo 4: " + EQUIPO, CURSO, FECHA):
     doc.add_paragraph(line).alignment = WD_ALIGN_PARAGRAPH.CENTER
 doc.add_page_break()
 
 doc.add_heading("Resumen", 1)
 doc.add_paragraph(
+    "Este anexo acompaña al informe principal (Informe_Proyecto_Econometria). Aplica a los mismos datos el resto de las "
+    "herramientas del curso; las conclusiones del proyecto están en el informe. "
     f"Se estima una ecuación de salarios tipo Mincer con {n} trabajadores de la National Longitudinal Survey (base wage2 "
     "de Wooldridge) y se recorren todos los temas del segundo parcial: regresión lineal simple, supuestos, interpretación, "
     "pruebas t y F, variables dummy e interacciones, R² ajustada, precios hedónicos, modelos no anidados, regresión "
@@ -141,8 +147,8 @@ doc.add_paragraph(
     f"experiencia y su cuadrado tienen VIF de {VF['exper']['VIF']:.1f} y {VF['exper²']['VIF']:.1f}, la prueba de Farrar–Glauber "
     f"rechaza la ortogonalidad (χ² = {FG['chi2']:.0f}) y la experiencia y la edad no son significativas individualmente "
     f"pero sí en conjunto (F = {PF[1]['F']:.2f}, p = {PF[1]['p']:.3f}). Centrar, combinar regresores, componentes principales "
-    f"y Ridge reducen el problema. El retorno a la educación pasa de {100*S['b1']:.1f}% en la regresión simple a "
-    f"≈{100*RED['params']['educ']:.1f}% al controlar por habilidad, lo que refleja sesgo por variable omitida y no "
+    f"y Ridge reducen el problema. La asociación entre educación y salario pasa de {100*S['b1']:.1f}% en la regresión simple a "
+    f"≈{100*RED['params']['educ']:.1f}% al controlar por habilidad (asociación, no efecto causal), lo que refleja sesgo por variable omitida y no "
     "multicolinealidad. Para los temas de series de tiempo se usan datos reales de consumo de EE. UU. y de acciones tecnológicas.")
 
 doc.add_heading("1. Introducción y datos", 1)
@@ -303,7 +309,7 @@ doc.add_paragraph(
     f"(completo); exper (t = {F_['t']['exper']:.2f}), exper² (t = {F_['t']['I(exper ** 2)']:.2f}) y age "
     f"(t = {F_['t']['age']:.2f}) no son significativas individualmente pero sí en conjunto.")
 doc.add_paragraph(
-    f"Soluciones: (a) centrar exper reduce corr(exper, exper²) de {R['corr_exper_exper2']:.3f} a {R['corr_experc']:.3f} y el "
+    f"Soluciones (el modelo preferido usa sólo (a); (b) y (c) son análisis de sensibilidad, porque eliminar controles para bajar un VIF cambia la pregunta): (a) centrar exper reduce corr(exper, exper²) de {R['corr_exper_exper2']:.3f} a {R['corr_experc']:.3f} y el "
     f"VIF máximo de {C['Completo']['VIF_max']:.1f} a {R['vif_centrado_max']:.2f} sin cambiar R²; (b) eliminar age y promediar "
     f"meduc y feduc (validado por la prueba F de β_meduc = β_feduc); (c) el primer componente principal de IQ, KWW, meduc y feduc "
     f"explica el {100*R['pca']['var'][0]:.1f}% de su varianza; (d) Ridge con λ ≈ {R['ridge']['alpha']:.0f} encoge primero "
@@ -311,7 +317,7 @@ doc.add_paragraph(
 figura(doc, "vif", "Figura 8. VIF antes y después de centrar la experiencia.")
 tabla(doc, T_comp, "Modelo")
 pie(doc, "Tabla 12. Comparación de especificaciones.")
-figura(doc, "educ", "Figura 9. Retorno a la educación por especificación (IC 95%).", 4.8)
+figura(doc, "educ", "Figura 9. Coeficiente de educ por especificación (IC 95%).", 4.8)
 figura(doc, "ridge", "Figura 10. Trayectorias de Ridge.", 5)
 
 doc.add_heading("13. MANOVA", 1)
@@ -323,7 +329,7 @@ doc.add_paragraph(
     "columnas de X.")
 
 doc.add_heading("14. Distribución de los residuos y diagnóstico (5.1–5.2)", 1)
-figura(doc, "residuos", "Figura 11. Residuos vs ajustados, Q–Q, histograma y leverage–Cook (modelo reducido).")
+figura(doc, "residuos", "Figura 11. Residuos vs ajustados, Q–Q, histograma y leverage–Cook (modelo preferido).")
 doc.add_paragraph(f"No hay curvatura ni un abanico marcado. La cola izquierda es más pesada que la normal. Hay "
                   f"{R['n_cook_4n']} observaciones con distancia de Cook > 4/n, pero la mayor vale sólo "
                   f"{R['cook_max_red']:.3f}: ninguna domina la estimación.")
@@ -332,10 +338,10 @@ doc.add_heading("15. Heteroscedasticidad y Breusch–Pagan (5.3–5.6)", 1)
 doc.add_paragraph(
     f"Regresión auxiliar de ê² sobre las {H['q']} regresoras: R²aux = {H['R2aux']:.4f}, LM = n·R²aux = {n}×{H['R2aux']:.4f} = "
     f"{H['LM']:.2f} > χ²({H['q']}; 0.05) = {H['crit']:.2f} (p = {H['bp_p']:.3f}): se rechaza la homoscedasticidad. White "
-    f"no la rechaza (p = {H['white_p']:.2f}). Los errores HC0–HC3 casi no cambian y WLS/FGLS da β educ = {H['wls_educ']:.4f} "
+    f"{'la rechaza apenas' if H['white_p'] < .05 else 'no la rechaza'} (p = {H['white_p']:.3f}). Los errores HC0–HC3 casi no cambian y WLS/FGLS da β educ = {H['wls_educ']:.4f} "
     f"(ee {H['wls_se']:.4f}): la heteroscedasticidad es leve. Por prudencia, el modelo final se reporta con errores HC1.")
 tabla(doc, T_red, "Variable")
-pie(doc, f"Tabla 13. Modelo final (reducido) con errores robustos HC1; R² = {RED['R2']:.3f}.")
+pie(doc, f"Tabla 13. Modelo preferido (todos los controles, experiencia centrada) con errores robustos HC1; R² = {RED['R2']:.3f}.")
 
 doc.add_heading("16. Autocorrelación: DW, BG y HAC (5.7–5.10)", 1)
 doc.add_paragraph(
@@ -380,12 +386,12 @@ doc.add_paragraph("El modelo completo y el reducido predicen casi igual: la mult
 
 doc.add_heading("20. Conclusiones", 1)
 bullets(doc, [
-    f"El retorno a la educación es positivo y robusto: {100*S['b1']:.1f}% en la regresión simple y ≈4–5% al controlar habilidad y "
+    f"La asociación entre educación y salario es positiva y robusta: {100*S['b1']:.1f}% en la regresión simple y ≈4–5% al controlar habilidad y "
     "entorno familiar. La caída se debe a sesgo por variable omitida, no a multicolinealidad.",
     "La multicolinealidad perfecta impide estimar; la imperfecta no sesga MCO (sigue siendo MELI) pero infla las varianzas.",
     "VIF, tolerancia, Klein, autovalores, número de condición y Farrar–Glauber coinciden: el problema está en exper, exper² y age.",
     "La prueba F conjunta detecta lo que las pruebas t individuales no pueden: el ciclo de vida sí importa.",
-    "Centrar, eliminar o combinar con justificación teórica, usar componentes principales o Ridge reducen el problema sin perder ajuste.",
+    "Centrar resuelve la colinealidad estructural del polinomio; eliminar o combinar controles, PCA y Ridge sólo se usan como sensibilidad: β educ apenas cambia.",
     "Diagnóstico: heteroscedasticidad leve (se reporta con HC1), no normalidad irrelevante con n grande y sin problemas de forma "
     "funcional. En series de tiempo, la autocorrelación del modelo estático exige dinámica o HAC.",
     "La misma lección aparece en precios hedónicos, finanzas y rezagos distribuidos."])
@@ -400,7 +406,7 @@ for ref in ["Belsley, D., Kuh, E. y Welsch, R. (1980). Regression Diagnostics. W
             "Mincer, J. (1974). Schooling, Experience, and Earnings. NBER.",
             "Wooldridge, J. M. (2020). Introducción a la econometría (7.ª ed.). Cengage."]:
     doc.add_paragraph(ref)
-doc.save(ROOT / "Reporte_Multicolinealidad_Mincer.docx")
+doc.save(ROOT / "Anexo_Tecnico_Temas_del_Curso.docx")
 
 # ===================================================================== POWERPOINT
 OSC, AC_, TXT, BL, RO = PRGB(0x1D, 0x24, 0x33), PRGB(0x2F, 0x6F, 0x9F), PRGB(0x33, 0x33, 0x33), PRGB(255, 255, 255), PRGB(0xD1, 0x60, 0x3D)
@@ -467,22 +473,123 @@ bg = sl.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, prs.slide_h
 bg.fill.solid()
 bg.fill.fore_color.rgb = OSC
 bg.line.fill.background()
-caja(sl, .9, 2.0, 11.5, 1.6, "Multicolinealidad en la ecuación de salarios de Mincer", 42, BL, True)
-caja(sl, .9, 3.75, 11.5, .8, "Regresión simple y múltiple, inferencia y diagnóstico con datos reales", 21, PRGB(0xBF, 0xD4, 0xEE))
-caja(sl, .9, 5.3, 11.5, 1.2, [AUTORA, f"{CURSO}  ·  {FECHA}"], 18, BL)
+caja(sl, .9, 1.7, 11.5, 1.6, "Escolaridad, habilidad y salario: ¿la multicolinealidad impide medir la asociación?", 38, BL, True)
+caja(sl, .9, 3.85, 11.5, .8, "Una ecuación de Mincer con datos de la NLS (EE. UU., 1980)", 21, PRGB(0xBF, 0xD4, 0xEE))
+caja(sl, .9, 5.0, 11.5, 1.6, ["Equipo 4: " + EQUIPO, CURSO, FECHA], 17, BL)
 
-sl = slide("Pregunta y datos")
-viñetas(sl, ["¿Cuánto aumenta el salario un año más de educación?",
-             "Controles (experiencia, edad, habilidad, padres) muy correlacionados → multicolinealidad",
-             f"wage2 (Wooldridge): {n} hombres, NLS 1980 — base principal",
-             "hprice1 (hedónicos), acciones tecnológicas (finanzas) y macrodata (series de tiempo)",
-             "Recorremos todos los temas del parcial: 4.1–4.9 y 5.1–5.13"], size=20)
-caja(sl, .6, 5.6, 12, .8, "ln wᵢ = β₀ + β₁ educᵢ + β₂ experᵢ + β₃ experᵢ² + … + εᵢ", 26, AC_, True)
+# ---------------- PRESENTACIÓN PRINCIPAL (8 minutos) ----------------
+b1_, b3_ = M1["params"]["educ"], M3["params"]["educ"]
+ci3_ = M3["ci"]["educ"]
+DD = R["descriptivos"]
+sl = slide("Pregunta e hipótesis", "1 · Pregunta")
+viñetas(sl, ["¿Cómo se asocia la escolaridad con el salario de hombres trabajadores en EE. UU. (1980), comparando personas "
+             "con igual experiencia, antigüedad, habilidad medida y antecedentes familiares?",
+             "¿Qué tan precisamente podemos medirla si esos controles están correlacionados entre sí (multicolinealidad)?",
+             "H₀: β_educ = 0  vs  H₁: β_educ > 0, con α = 5% fijado antes de estimar",
+             "Esperamos β > 0 pero menor que en la regresión simple: sin controles, educ capta habilidad (sesgo por variable omitida)",
+             "Alcance: datos observacionales → asociaciones condicionadas, no efectos causales"], size=20)
+
+sl = slide("Datos", "2 · Datos")
+viñetas(sl, ["Fuente: WAGE2 (Wooldridge), de la National Longitudinal Survey of Young Men, EE. UU. 1980 "
+             "(Blackburn y Neumark, 1992). Paquete wooldridge 0.5.0, consultado el 18/11/2026",
+             "Unidad: hombre trabajador de 28–38 años · corte transversal",
+             f"Muestra: {R['n_original']} → n = {n} (eliminamos {R['n_original'] - n} sin escolaridad de los padres)",
+             "Archivo, diccionario y transformaciones: data/wage2_muestra.csv y data/DICCIONARIO.md"], w=6.6, size=16)
+ptabla(sl, pd.DataFrame({v: {"Media": f"{DD[v]['mean']:.1f}", "D.E.": f"{DD[v]['std']:.1f}", "Mín": f"{DD[v]['min']:.0f}",
+                             "Máx": f"{DD[v]['max']:.0f}"} for v in ["wage", "educ", "exper", "tenure", "IQ", "KWW", "meduc", "feduc"]}).T,
+       7.5, 1.4, 5.4, 13, "Variable")
+caja(sl, 7.5, 5.0, 5.4, 1.5, "wage: USD mensuales de 1980 · Y = ln(wage), porque el salario es asimétrico a la derecha", 13)
+
+sl = slide("Modelo y signos esperados", "3 · Modelo")
+caja(sl, .6, 1.25, 12.2, 1.0, "ln wᵢ = β₀ + β₁educᵢ + β₂experᶜᵢ + β₃(experᶜᵢ)² + β₄tenureᵢ + β₅ageᵢ + β₆IQᵢ + β₇KWWᵢ + β₈meducᵢ + β₉feducᵢ "
+     "+ dummies + uᵢ", 17, AC_, True)
+ptabla(sl, pd.DataFrame([["educ", "+", "Capital humano (variable de interés)"],
+                         ["exper (centrada), exper²", "+, −", "Perfil de ciclo de vida; centrar evita colinealidad artificial"],
+                         ["tenure", "+", "Capital específico de la empresa"],
+                         ["IQ, KWW", "+", "Proxies de habilidad: por eso las incluimos"],
+                         ["meduc, feduc", "+", "Entorno familiar"],
+                         ["married · black · south · urban", "+ · − · − · +", "Ref.: no casado, no afroam., fuera del sur, no urbano"]],
+                        columns=["Variable", "Signo", "Por qué"]).set_index("Variable"), .6, 2.3, 12.2, 14, "Variable")
+caja(sl, .6, 5.7, 12.2, 1, "MCO con errores robustos HC1 · el coeficiente de una variable en logaritmos se lee como 100·β % "
+     "(exacto: 100·(e^β − 1)), manteniendo constantes las demás variables", 14)
+
+sl = slide("Resultados: la asociación cae al controlar habilidad", "4 · Resultados")
+fila = lambda M, k: f"{M['params'][k]:.4f} ({M['se'][k]:.4f})" if k in M["params"] else "—"
+ptabla(sl, pd.DataFrame({
+    "(1) Simple": [fila(M1, "educ"), "—", "—", "—", "no", f"{M1['R2']:.3f}"],
+    "(2) Mincer": [fila(M2, "educ"), fila(M2, "exper_c"), "—", "—", "no", f"{M2['R2']:.3f}"],
+    "(3) Preferido": [fila(M3, "educ"), fila(M3, "exper_c"), fila(M3, "IQ"), fila(M3, "KWW"), "sí", f"{M3['R2']:.3f}"]},
+    index=["educ", "exper (centrada)", "IQ", "KWW", "Resto de controles", "R²"]), .5, 1.35, 7.4, 14, "ln(wage)")
+caja(sl, .5, 4.2, 7.4, .5, f"EE robustos HC1 entre paréntesis; n = {n}", 12)
+img(sl, "educ", 8.1, 1.35, w=5.0)
+caja(sl, .5, 4.9, 12.4, 2, [f"β_educ: {b1_:.3f} (simple) → {M2['params']['educ']:.3f} (Mincer) → {b3_:.3f} (con habilidad y familia)",
+                            "La caída es sesgo por variable omitida (habilidad), no multicolinealidad"], 18, TXT, True)
+
+sl = slide("Interpretación de los coeficientes", "4 · Resultados")
+dato(sl, .6, 1.35, f"+{100*b3_:.1f}%", f"salario por un año más de escolaridad (≈ {DD['wage']['mean']*pct(b3_)/100:.0f} USD/mes en la media)")
+dato(sl, 4.6, 1.35, f"[{100*ci3_[0]:.1f}, {100*ci3_[1]:.1f}]", "IC 95% robusto (log-puntos ×100): excluye 0 → se rechaza H₀")
+dato(sl, 8.6, 1.35, f"+{pct(4*b3_):.0f}%", "asociado con 4 años de universidad: relevante económicamente")
+viñetas(sl, [f"Casado {pct(M3['params']['married']):+.1f}% · urbano {pct(M3['params']['urban']):+.1f}% · sur {pct(M3['params']['south']):+.1f}% "
+             f"(exactos) · afroamericano {pct(M3['params']['black']):+.1f}% (no signif., p = {M3['p']['black']:.2f})",
+             f"IQ: +1 desv. est. → {100*M3['params']['IQ']*DD['IQ']['std']:+.1f}% · KWW, meduc, feduc no significativas solas",
+             f"Experiencia {100*M3['params']['exper_c']:+.2f}% por año; exper² ≈ 0 (p = {M3['p']['I(exper_c ** 2)']:.2f}): "
+             "en esta cohorte joven no se ve la concavidad",
+             "Significancia ≠ relevancia: reportamos magnitud, unidades e incertidumbre"], y=3.75, h=3.3, size=17)
+
+sl = slide("Multicolinealidad: ¿dónde está?", "5 · Diagnóstico")
+img(sl, "correlaciones", .3, 1.25, h=5.0)
+img(sl, "vif", 6.6, 1.25, w=6.5)
+caja(sl, .4, 6.3, 12.6, 1.1, f"exper y exper²: VIF {VF['exper']['VIF']:.0f} y {VF['exper²']['VIF']:.0f} → estructural (polinomio); al centrar, VIF máx = "
+     f"{R['vif_centrado_max']:.2f} con el mismo R²  ·  Sustantiva: educ–IQ–KWW–padres, VIF 1.6–2.2", 15)
+
+sl = slide("¿La multicolinealidad impide responder?", "5 · Diagnóstico")
+viñetas(sl, [f"Infla la varianza: ee(β_educ) {R['base']['bse']['educ']:.4f} → {F_['bse']['educ']:.4f}; √VIF_educ = "
+             f"√{VF['educ']['VIF']:.2f} ≈ {np.sqrt(VF['educ']['VIF']):.2f}",
+             "…pero el IC 95% de educ sigue lejos de 0 → la pregunta principal SÍ se puede responder",
+             f"Donde estorba: separar IQ, KWW, meduc, feduc. Juntas: F = {PF[0]['F']:.2f} (p < 0.001); "
+             f"exper, exper², age: F = {PF[1]['F']:.2f} (p = {PF[1]['p']:.3f})",
+             "No eliminamos controles para bajar un VIF: todos se justifican por teoría",
+             f"Sensibilidad: quitar age y KWW → {C['Reducido']['beta_educ']:.3f}; componente principal → {C['PCA']['beta_educ']:.3f} "
+             "(dentro del IC: conclusión robusta)"], size=18)
+
+sl = slide("Diagnóstico de supuestos", "5 · Diagnóstico")
+ptabla(sl, pd.DataFrame([["Breusch–Pagan", f"LM = {H['LM']:.1f}, p = {H['bp_p']:.3f}", "Heteroscedasticidad leve → EE HC1"],
+                         ["White", f"p = {H['white_p']:.3f}", WH],
+                         ["RESET", f"p = {R['reset']['p']:.2f}", "Forma funcional adecuada"],
+                         ["Jarque–Bera", f"JB = {JB['JB']:.0f}, p < 0.001", f"No normal; con n = {n} vale asintóticamente"],
+                         ["Cook máx.", f"{R['cook_max_red']:.3f}", "Ninguna observación domina"],
+                         ["Exogeneidad", "No comprobable", "Habilidad medida con error → asociación"]],
+                        columns=["Prueba", "Resultado", "Decisión"]).set_index("Prueba"), .4, 1.4, 7.2, 13, "Prueba")
+img(sl, "residuos", 7.8, 1.3, w=5.3)
+
+sl = slide("Conclusiones y limitaciones", "6 · Cierre")
+viñetas(sl, [f"Un año más de escolaridad se asocia con ≈{pct(b3_):.0f}% más salario, comparando personas con igual "
+             f"habilidad medida y entorno (vs {pct(b1_):.0f}% sin controles)",
+             "La multicolinealidad es moderada: aumenta la varianza, pero no impide responder; los VIF extremos eran artificio del polinomio",
+             "Limitaciones: no es causal (habilidad medida con error, error de medición en educ); selección (solo empleados, "
+             f"{R['n_original'] - n} observaciones eliminadas); hombres de EE. UU. en 1980",
+             f"¿Qué decisión de modelado cambia la conclusión? Incluir o no la habilidad: {b1_:.3f} → {b3_:.3f}. "
+             "Quitar controles para bajar VIF casi no la mueve"], size=18)
+
+sl = slide("Reproducibilidad y fuentes", "6 · Cierre")
+viñetas(sl, ["Repositorio: github.com/ximeelaraa/mincer-multicolinealidad",
+             "Código: scripts/analisis.py y multicolinealidad_mincer.ipynb (corre en Colab)",
+             "Datos: data/wage2_muestra.csv + data/DICCIONARIO.md (fuente, fecha, variables, limpieza)",
+             "Blackburn y Neumark (1992), QJE · Mincer (1974) · Wooldridge (2020) · Belsley, Kuh y Welsch (1980) · Galindo (2026)"], size=18)
+
+sl = prs.slides.add_slide(BLANK)
+bg = sl.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, prs.slide_height)
+bg.fill.solid()
+bg.fill.fore_color.rgb = OSC
+bg.line.fill.background()
+num[0] += 1
+caja(sl, .9, 2.6, 11.5, 1.2, "Respaldo para preguntas", 40, BL, True)
+caja(sl, .9, 3.8, 11.5, 1.2, "Temas complementarios del curso aplicados a los mismos datos", 20, PRGB(0xBF, 0xD4, 0xEE))
 
 sl = slide("Regresión lineal simple", "MCO")
 ptabla(sl, T_simple, .5, 1.35, 5.6, 12, "Cantidad")
 img(sl, "simple_recta", 6.3, 1.4, w=6.8)
-caja(sl, 6.3, 4.4, 6.8, 2.6, [f"+1 año de educación → +{100*S['b1']:.1f}% salario (exacto {S['efecto_exacto']:.1f}%)",
+caja(sl, 6.3, 4.4, 6.8, 2.6, [f"+1 año de educación se asocia con +{100*S['b1']:.1f}% salario (exacto {S['efecto_exacto']:.1f}%)",
                               f"R² = ρ̂² = {S['R2']:.3f}: significativa pero explica poco",
                               f"Dummy urban: β̂₁ = diferencia de medias = {S['dummy']['b1']:.3f}",
                               f"Gauss–Markov: var MCO {R['gauss_markov']['var_mco']:.1e} < alternativo {R['gauss_markov']['var_alt']:.1e}"], 15)
@@ -565,7 +672,7 @@ caja(sl, 8.7, 1.5, 4.4, 5.5, [f"Cook máx = {R['cook_max_red']:.3f}: sin observa
 
 sl = slide("Heteroscedasticidad y Jarque–Bera", "5.3–5.6, 5.13")
 viñetas(sl, [f"BP: R²aux = {H['R2aux']:.4f} → LM = n·R² = {H['LM']:.2f} > χ²({H['q']}) = {H['crit']:.2f} (p = {H['bp_p']:.3f})",
-             f"White: p = {H['white_p']:.2f} (pierde potencia)",
+             f"White: p = {H['white_p']:.3f} ({WH.lower()}; menos potencia)",
              f"HC0–HC3 casi iguales a los clásicos; WLS: β educ = {H['wls_educ']:.4f}",
              f"JB = {n}/6·(S² + (K−3)²/4) = {JB['JB']:.0f} > 5.99 → no normalidad (K = {JB['K']:.2f})",
              f"RESET p = {R['reset']['p']:.2f}: forma funcional adecuada"], size=19)
@@ -588,11 +695,11 @@ ptabla(sl, pd.DataFrame([{"Modelo": p["modelo"], "R² prueba": f"{p['R2_test']:.
 caja(sl, 8, 1.5, 5, 4, ["Completo ≈ reducido fuera de muestra", "La multicolinealidad afecta la interpretación, no la predicción",
                         "Ridge: menor RMSE a cambio de sesgo"], 17)
 
-sl = slide("Conclusiones")
-viñetas(sl, [f"Retorno a la educación robusto: {100*S['b1']:.1f}% (simple) → ≈{100*RED['params']['educ']:.1f}% (controlando habilidad)",
+sl = slide("Conclusiones del material complementario", "Respaldo")
+viñetas(sl, [f"Asociación educación–salario robusta: {100*S['b1']:.1f}% (simple) → ≈{100*RED['params']['educ']:.1f}% (controlando habilidad)",
              "Perfecta: no hay MCO único · Imperfecta: MCO sigue siendo MELI, pero las varianzas se inflan",
              "Todos los diagnósticos apuntan a exper, exper² y age; la F conjunta revela lo que las t no",
-             "Centrar, combinar, PCA o Ridge corrigen sin perder ajuste",
+             "Centrar corrige la colinealidad del polinomio; combinar, PCA o Ridge sólo como sensibilidad",
              "Heteroscedasticidad leve (HC1), no normalidad irrelevante con n grande; en series de tiempo hace falta dinámica o HAC",
              "La misma lección aparece en hedónicos, finanzas y rezagos"], size=19)
 prs.save(ROOT / "Presentacion_Multicolinealidad_Mincer.pptx")
@@ -633,7 +740,7 @@ red_rows = [[NOM.get(c, c).replace("exper_c²", r"exper$_c^2$").replace("exper_c
              pl(RED["p_hc1"][c]), f2(RED["exacto"][c]).replace("-", "$-$")] for c in RED["params"] if c != "Intercept"]
 q_rows = [[q["tau"], f4(q["beta_educ"]), f4(q["ee"]), f"[{q['inf']:.3f}, {q['sup']:.3f}]"] for q in Q["tabla"]]
 diag_rows = [["Breusch--Pagan", rf"LM $=$ {H['LM']:.2f}", pl(H["bp_p"]), "Rechaza homoscedasticidad"],
-             ["White", rf"LM $=$ {H['white_LM']:.2f}", pl(H["white_p"]), "No rechaza"],
+             ["White", rf"LM $=$ {H['white_LM']:.2f}", pl(H["white_p"]), WH],
              ["RESET", rf"F $=$ {R['reset']['F']:.3f}", pl(R["reset"]["p"]), "No rechaza"],
              ["Jarque--Bera", rf"JB $=$ {JB['JB']:.1f}", pl(JB["p"]), "Rechaza normalidad"],
              ["DW (consumo)", rf"DW $=$ {AC['dw']:.3f}", "--", r"$\rho>0$ fuerte"],
@@ -643,13 +750,192 @@ rez_rows = [[r_["rezagos"], f"{r_['AIC']:.1f}", f"{r_['BIC']:.1f}", f3(r_["suma_
 pred_rows = [[p["modelo"], f4(p["R2_test"]), f4(p["RMSE_test"])] for p in R["prediccion"]]
 r2_rows = [[r_["modelo"], r_["k"], f4(r_["R2"]), f4(r_["R2_aj"])] for r_ in R["r2"]]
 
+# ---------------- Beamer: presentación principal (8 minutos) ----------------
+def tfila(M, k):
+    return rf"{M['params'][k]:.4f}\,({M['se'][k]:.4f})" if k in M["params"] else "--"
+
+
+DD = R["descriptivos"]
+b1_, b3_, ci3_ = M1["params"]["educ"], M3["params"]["educ"], M3["ci"]["educ"]
+desc_rows = [[v, f"{DD[v]['mean']:.1f}", f"{DD[v]['std']:.1f}", f"{DD[v]['min']:.0f}", f"{DD[v]['max']:.0f}"]
+             for v in ["wage", "educ", "exper", "tenure", "IQ", "KWW", "meduc", "feduc"]]
+res_rows = [["educ", tfila(M1, "educ"), tfila(M2, "educ"), tfila(M3, "educ")],
+            ["exper (centrada)", "--", tfila(M2, "exper_c"), tfila(M3, "exper_c")],
+            ["IQ", "--", "--", tfila(M3, "IQ")], ["KWW", "--", "--", tfila(M3, "KWW")],
+            ["Resto de controles", "no", "no", "sí"],
+            ["$R^2$", f"{M1['R2']:.3f}", f"{M2['R2']:.3f}", f"{M3['R2']:.3f}"]]
+diag_main = [["Breusch--Pagan", rf"LM $=$ {H['LM']:.1f}, $p=$ {H['bp_p']:.3f}", "Leve $\\to$ EE HC1"],
+             ["White", rf"$p=$ {H['white_p']:.3f}", WH],
+             ["RESET", rf"$p=$ {R['reset']['p']:.2f}", "Forma funcional OK"],
+             ["Jarque--Bera", rf"JB $=$ {JB['JB']:.0f}, $p<0.001$", "No normal; $n$ grande"],
+             ["Cook máx.", f"{R['cook_max_red']:.3f}", "Nadie domina"],
+             ["Exogeneidad", "No comprobable", "$\\Rightarrow$ asociación"]]
+MAIN_TEX = T(r"""
+\begin{frame}{Pregunta e hipótesis}
+\begin{itemize}
+\item \textbf{Pregunta:} ¿cómo se asocia la escolaridad con el salario de hombres trabajadores en EE.\,UU. (1980), comparando personas con igual experiencia, antigüedad, habilidad medida y antecedentes familiares?
+\item ¿Qué tan precisamente podemos medirla si esos controles están correlacionados entre sí (\alert{multicolinealidad})?
+\item $H_0:\beta_{educ}=0$ vs $H_1:\beta_{educ}>0$, con $\alpha=5\%$ fijado antes de estimar.
+\item Esperamos $\beta_{educ}>0$, pero menor que en la regresión simple: sin controles, $educ$ capta habilidad (sesgo por variable omitida).
+\item \textbf{Alcance:} datos observacionales $\Rightarrow$ asociaciones condicionadas, no efectos causales.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Datos}
+\begin{columns}[T]
+\column{0.55\textwidth}\small
+\begin{itemize}
+\item \textbf{Fuente:} WAGE2 (Wooldridge), de la \textit{National Longitudinal Survey of Young Men}, EE.\,UU. 1980 (Blackburn y Neumark, 1992). Paquete \texttt{wooldridge} 0.5.0, consultado el 18/11/2026.
+\item \textbf{Unidad:} hombre trabajador de 28--38 años; corte transversal.
+\item \textbf{Muestra:} @n0@ $\to$ $n=@n@$ (eliminamos @nd@ sin escolaridad de los padres).
+\item $Y=\ln(wage)$; $wage$ en USD mensuales de 1980 (asimétrico a la derecha).
+\item Archivo, diccionario y limpieza: \texttt{data/DICCIONARIO.md}.
+\end{itemize}
+\column{0.42\textwidth}\centering\footnotesize
+@TDESC@
+\end{columns}
+\end{frame}
+
+\begin{frame}{Modelo y signos esperados}
+\small
+\begin{align*}
+\ln w_i=\;&\beta_0+\beta_1 educ_i+\beta_2 exper^c_i+\beta_3 (exper^c_i)^2+\beta_4 tenure_i+\beta_5 age_i\\
+&+\beta_6 IQ_i+\beta_7 KWW_i+\beta_8 meduc_i+\beta_9 feduc_i+\text{dummies}_i+u_i
+\end{align*}
+\centering\footnotesize
+@TSIG@
+
+\vspace{0.4em}\raggedright\small
+MCO con errores robustos HC1. Con $\ln w$, $100\beta$ es el cambio \% aproximado (exacto: $100(e^{\beta}-1)$), manteniendo constantes las demás variables.
+\end{frame}
+
+\begin{frame}{Resultados: la asociación cae al controlar habilidad}
+\begin{columns}[T]
+\column{0.64\textwidth}\centering\scriptsize\setlength{\tabcolsep}{3pt}
+@TRES@
+
+\vspace{0.2em}\scriptsize EE robustos HC1 entre paréntesis; $n=@n@$.
+\column{0.34\textwidth}
+\includegraphics[width=\linewidth]{educ}
+\end{columns}
+\vspace{0.6em}
+\begin{center}
+$\hat\beta_{educ}$: @b1@ (simple) $\to$ @b2@ (Mincer) $\to$ \alert{@b3@} (con habilidad y familia)\\[0.3em]
+\small La caída es \alert{sesgo por variable omitida} (habilidad), no multicolinealidad.
+\end{center}
+\end{frame}
+
+\begin{frame}{Interpretación de los coeficientes}
+\begin{center}
+\dato{+@e1@\%}{salario por un año más de escolaridad ($\approx$ @usd@ USD/mes en la media)}\hfill
+\dato{[@c0@, @c1@]}{IC 95\% robusto ($\times 100$): excluye 0 $\Rightarrow$ se rechaza $H_0$}\hfill
+\dato{+@e4@\%}{asociado con 4 años de universidad: relevante}
+\end{center}
+\vspace{0.6em}
+\small
+\begin{itemize}
+\item Casado @mar@\% $\cdot$ urbano @urb@\% $\cdot$ sur @sur@\% (exactos) $\cdot$ afroamericano @blk@\% (no signif., $p=@pblk@$).
+\item IQ: $+1$ desv. est. $\to$ @iq@\%. KWW, meduc y feduc no son significativas solas.
+\item Experiencia @ex@\% por año; $exper^2\approx 0$ ($p=@pex2@$): en esta cohorte joven no se ve la concavidad.
+\item Significancia $\neq$ relevancia: reportamos magnitud, unidades e incertidumbre.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Multicolinealidad: ¿dónde está?}
+\begin{columns}[T]
+\column{0.42\textwidth}
+\includegraphics[width=\linewidth]{correlaciones}
+\column{0.56\textwidth}
+\includegraphics[width=\linewidth]{vif}
+\end{columns}
+\small
+\begin{itemize}
+\item $exper$ y $exper^2$: VIF @v1@ y @v2@ $\Rightarrow$ \alert{estructural} (polinomio, $r=@rex@$). Al centrar: VIF máximo @vc@, mismo $R^2$.
+\item \alert{Sustantiva}: educ--IQ--KWW--padres, VIF moderados (1.6--2.2).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{¿La multicolinealidad impide responder?}
+\begin{itemize}
+\item Infla la varianza: $se(\hat\beta_{educ})$ pasa de @seb@ a @sef@; $\sqrt{VIF_{educ}}=\sqrt{@vif@}\approx @svif@$.
+\item \ldots pero el IC 95\% de $educ$ sigue lejos de 0 $\Rightarrow$ \alert{la pregunta sí se puede responder}.
+\item Donde estorba: separar IQ, KWW, meduc y feduc. Juntas: $F=@F0@$ ($p<0.001$); $exper$, $exper^2$ y $age$: $F=@F1@$ ($p=@p1@$).
+\item \textbf{No} eliminamos controles para bajar un VIF: todos se justifican por teoría.
+\item Sensibilidad: sin age ni KWW, $\hat\beta_{educ}=@bred@$; con componente principal, @bpca@. Ambos dentro del IC: la conclusión es robusta.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Diagnóstico de supuestos}
+\begin{columns}[T]
+\column{0.6\textwidth}\centering\scriptsize\setlength{\tabcolsep}{3pt}
+@TDIAG@
+\column{0.38\textwidth}
+\includegraphics[width=\linewidth]{residuos}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Conclusiones y limitaciones}
+\begin{enumerate}
+\item Un año más de escolaridad se asocia con $\approx$@e1r@\% más salario, comparando personas con igual habilidad medida y entorno (contra @es@\% sin controles).
+\item La multicolinealidad es moderada: aumenta la varianza, pero no impide responder. Los VIF extremos eran un artificio del polinomio.
+\item \textbf{Limitaciones:} no es causal (habilidad medida con error, error de medición en educ); selección (solo empleados, @nd@ observaciones eliminadas); hombres de EE.\,UU. en 1980.
+\item \alert{¿Qué decisión de modelado cambia la conclusión?} Incluir o no la habilidad: @b1@ $\to$ @b3@. Quitar controles para bajar el VIF casi no la mueve.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Reproducibilidad y fuentes}
+\begin{itemize}
+\item Repositorio: \texttt{github.com/ximeelaraa/mincer-multicolinealidad}
+\item Código: \texttt{scripts/analisis.py} y \texttt{multicolinealidad\_mincer.ipynb} (corre en Colab).
+\item Datos: \texttt{data/wage2\_muestra.csv} y \texttt{data/DICCIONARIO.md}.
+\end{itemize}
+\small
+Blackburn y Neumark (1992), \textit{QJE} 107(4) $\cdot$ Mincer (1974) $\cdot$ Wooldridge (2020) $\cdot$ Belsley, Kuh y Welsch (1980) $\cdot$ Galindo (2026), notas del curso, UP.
+\end{frame}
+
+\appendix
+\begin{frame}
+\centering\vfill
+{\Large\color{tinta}\textbf{Respaldo para preguntas}}\\[0.6em]
+Temas complementarios del curso aplicados a los mismos datos
+\vfill
+\end{frame}
+""", n0=R["n_original"], n=n, nd=R["n_original"] - n,
+    TDESC=tex_tabla(["Variable", "Media", "D.E.", "Mín", "Máx"], desc_rows),
+    TSIG=tex_tabla(["Variable", "Signo", "Por qué"], [["educ", "$+$", "Capital humano (variable de interés)"],
+                                                     [r"exper$^c$, (exper$^c)^2$", "$+$, $-$", "Ciclo de vida; centrar evita colinealidad artificial"],
+                                                     ["tenure", "$+$", "Capital específico de la empresa"],
+                                                     ["IQ, KWW", "$+$", "Proxies de habilidad: por eso las incluimos"],
+                                                     ["meduc, feduc", "$+$", "Entorno familiar"],
+                                                     ["married, black, south, urban", "$+,-,-,+$", "Ref.: no casado, no afroam., fuera del sur, no urbano"]], "lcl"),
+    TRES=tex_tabla([r"$\ln(wage)$", "(1) Simple", "(2) Mincer", "(3) Preferido"], res_rows, "lccc"),
+    b1=f"{b1_:.3f}", b2=f"{M2['params']['educ']:.3f}", b3=f"{b3_:.3f}",
+    e1=f"{100*b3_:.1f}", usd=f"{DD['wage']['mean']*pct(b3_)/100:.0f}", c0=f"{100*ci3_[0]:.1f}", c1=f"{100*ci3_[1]:.1f}",
+    e4=f"{pct(4*b3_):.0f}", mar=f"{pct(M3['params']['married']):+.1f}", urb=f"{pct(M3['params']['urban']):+.1f}",
+    sur=f"{pct(M3['params']['south']):+.1f}".replace("-", "$-$"), blk=f"{pct(M3['params']['black']):+.1f}".replace("-", "$-$"),
+    pblk=f"{M3['p']['black']:.2f}", iq=f"{100*M3['params']['IQ']*DD['IQ']['std']:+.1f}", ex=f"{100*M3['params']['exper_c']:+.2f}",
+    pex2=f"{M3['p']['I(exper_c ** 2)']:.2f}", v1=f"{VF['exper']['VIF']:.0f}", v2=f"{VF['exper²']['VIF']:.0f}",
+    rex=f"{R['corr_exper_exper2']:.3f}", vc=f"{R['vif_centrado_max']:.2f}", seb=f"{R['base']['bse']['educ']:.4f}",
+    sef=f"{F_['bse']['educ']:.4f}", vif=f"{VF['educ']['VIF']:.2f}", svif=f"{np.sqrt(VF['educ']['VIF']):.2f}",
+    F0=f"{PF[0]['F']:.2f}", F1=f"{PF[1]['F']:.2f}", p1=f"{PF[1]['p']:.3f}", bred=f"{C['Reducido']['beta_educ']:.3f}",
+    bpca=f"{C['PCA']['beta_educ']:.3f}", TDIAG=tex_tabla(["Prueba", "Resultado", "Decisión"], diag_main, "lll"),
+    e1r=f"{pct(b3_):.0f}", es=f"{pct(b1_):.0f}")
+
+
 B = T(r"""\documentclass[aspectratio=169,10pt]{beamer}
+\usepackage{iftex}
+\ifPDFTeX
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\else
+\usepackage{fontspec}
+\fi
 \usepackage[spanish,es-nodecimaldot,es-noshorthands]{babel}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{appendixnumberbeamer}
 \graphicspath{{figuras/}}
 
 \usetheme{default}
@@ -665,9 +951,9 @@ B = T(r"""\documentclass[aspectratio=169,10pt]{beamer}
 \setbeamertemplate{footline}{\hfill\scriptsize\color{gray}\insertframenumber/\inserttotalframenumber\hspace{1em}\vspace{0.6em}}
 \newcommand{\dato}[2]{\begin{minipage}{0.3\textwidth}\centering{\Huge\color{naranja}\textbf{#1}}\\[0.3em]\small #2\end{minipage}}
 
-\title{Multicolinealidad en la ecuación de salarios de Mincer}
-\subtitle{Regresión simple y múltiple, inferencia y diagnóstico con datos reales}
-\author{@AUTORA@}
+\title{Escolaridad, habilidad y salario}
+\subtitle{¿La multicolinealidad impide medir la asociación? Una ecuación de Mincer con datos de la NLS (EE.\,UU., 1980)}
+\author{Equipo 4: @AUTORA@}
 \institute{@CURSO@}
 \date{@FECHA@}
 
@@ -676,8 +962,9 @@ B = T(r"""\documentclass[aspectratio=169,10pt]{beamer}
 \begin{frame}
 \titlepage
 \end{frame}
+@MAIN@
 
-\begin{frame}{Contenido}
+\begin{frame}{Respaldo: contenido}
 \begin{columns}[T]
 \column{0.5\textwidth}
 \begin{enumerate}
@@ -709,8 +996,8 @@ B = T(r"""\documentclass[aspectratio=169,10pt]{beamer}
 \end{frame}
 
 \section{Datos}
-\begin{frame}{Pregunta y datos}
-\textbf{¿Cuánto aumenta el salario un año más de educación?} Los controles (experiencia, edad, habilidad,
+\begin{frame}{Respaldo: bases de datos}
+\textbf{¿Cómo se asocia la escolaridad con el salario?} Los controles (experiencia, edad, habilidad,
 escolaridad de los padres) están muy correlacionados $\Rightarrow$ \alert{multicolinealidad}.
 \[
 \ln w_i=\beta_0+\beta_1 educ_i+\beta_2 exper_i+\beta_3 exper_i^2+\beta_4 tenure_i+\dots+\varepsilon_i
@@ -752,7 +1039,7 @@ escolaridad de los padres) están muy correlacionados $\Rightarrow$ \alert{multi
 \end{itemize}
 \end{columns}
 \end{frame}
-""", AUTORA=AUTORA, CURSO=CURSO, FECHA=FECHA,
+""", AUTORA=AUTORA, CURSO=CURSO, FECHA=FECHA, MAIN=MAIN_TEX,
     TAB_DATOS=tex_tabla(["Base", "Fuente", "Uso"], [["wage2", "Wooldridge (NLS 1980), $n=@n@$", "Base principal"],
                                                      ["hprice1", "Wooldridge, 88 casas", "4.6 Hedónicos"],
                                                      ["stocks", "Plotly, semanal 2018--2019", "4.9 Finanzas"],
@@ -996,27 +1283,27 @@ MANOVA trata varias $Y$; \alert{no} diagnostica multicolinealidad (propiedad de 
 
 \begin{frame}{5.3--5.6 Heteroscedasticidad: Breusch--Pagan paso a paso}
 \begin{enumerate}
-\item Estimar el modelo reducido por MCO y obtener $\hat\varepsilon_i$.
+\item Estimar el modelo preferido por MCO y obtener $\hat\varepsilon_i$.
 \item Regresión auxiliar de $\hat\varepsilon_i^2$ sobre las $q=@q@$ regresoras: $R^2_{aux}=@r2@$.
 \item $LM=nR^2_{aux}=@n@\times@r2@=@LM@$.
 \item $LM>\chi^2_{0.05;\,@q@}=@cr@$ ($p=@p@$) $\Rightarrow$ \alert{se rechaza homoscedasticidad}.
 \end{enumerate}
 \begin{itemize}
-\item White: $p=@wp@$ (pierde potencia por los muchos términos).
+\item White: $p=@wp@$ (@WH@; menos potencia por los muchos términos).
 \item Errores HC0--HC3 casi iguales a los clásicos; WLS/FGLS: $\hat\beta_{educ}=@wls@$.
 \item Los coeficientes MCO no cambian con errores robustos: sólo cambia su incertidumbre.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Modelo final con errores robustos (HC1)}
-\centering\scriptsize
+\begin{frame}{Modelo preferido con errores robustos (HC1)}
+\centering\tiny
 @TABRED@
 \vspace{0.5em}
 
-\small $n=@nn@$, $R^2=@R2@$. Variable dependiente: $\ln w$. Bases: no casado, no negro, fuera del sur, rural.
+\small $n=@nn@$, $R^2=@R2@$. Variable dependiente: $\ln w$. Referencia: no casado, no afroamericano, fuera del sur, no urbano.
 \end{frame}
 """, w=f4(mw["valor"]), pi=f4(mp_["valor"]), n1=f"{mw['num']:.0f}", n2=f"{mw['den']:.0f}", F=f2(mw["F"]), ck=f3(R["cook_max_red"]),
-       q=H["q"], r2=f4(H["R2aux"]), n=n, LM=f2(H["LM"]), cr=f2(H["crit"]), p=f3(H["bp_p"]), wp=f"{H['white_p']:.2f}",
+       q=H["q"], r2=f4(H["R2aux"]), n=n, LM=f2(H["LM"]), cr=f2(H["crit"]), p=f3(H["bp_p"]), wp=f"{H['white_p']:.3f}", WH=WH.lower(),
        wls=f4(H["wls_educ"]), TABRED=tex_tabla(["Variable", r"$\hat\beta$", "ee HC1", "$p$", "Efecto \\% exacto"], red_rows, "lrrrr"),
        nn=n, R2=f3(RED["R2"]))
 
@@ -1073,13 +1360,13 @@ Rezagos distribuidos: $\Delta\ln c_t$ sobre $\Delta\ln y_{t-j}$\\[0.3em]
 \end{columns}
 \end{frame}
 
-\begin{frame}{Conclusiones}
+\begin{frame}{Respaldo: conclusiones de los temas complementarios}
 \begin{enumerate}
-\item Retorno a la educación robusto: @s@\% (simple) $\to\approx$@r@\% con habilidad (sesgo por variable omitida).
+\item Asociación educación--salario robusta: @s@\% (simple) $\to\approx$@r@\% con habilidad (sesgo por variable omitida).
 \item Perfecta: no hay MCO único. Imperfecta: MCO sigue siendo MELI, pero las varianzas se inflan.
 \item VIF, tolerancia, Klein, autovalores, número de condición y Farrar--Glauber señalan $exper$, $exper^2$ y $age$.
 \item La $F$ conjunta revela lo que las $t$ individuales no pueden.
-\item Centrar, combinar, PCA o Ridge corrigen sin perder ajuste.
+\item Centrar corrige la colinealidad del polinomio; combinar, PCA o Ridge sólo como sensibilidad.
 \item Heteroscedasticidad leve (HC1); no normalidad irrelevante con $n$ grande; en series de tiempo, dinámica o HAC.
 \item La misma lección aparece en hedónicos, finanzas y rezagos.
 \end{enumerate}
@@ -1113,4 +1400,4 @@ with zipfile.ZipFile(ROOT / "Beamer_Overleaf.zip", "w", zipfile.ZIP_DEFLATED) as
     z.write(ROOT / "Presentacion_Beamer.tex", "Presentacion_Beamer.tex")
     for f in sorted(FIG.glob("*.png")):
         z.write(f, f"figuras/{f.name}")
-print("Listo: Reporte_Multicolinealidad_Mincer.docx, Presentacion_Multicolinealidad_Mincer.pptx, Presentacion_Beamer.tex, Beamer_Overleaf.zip")
+print("Listo: Anexo_Tecnico_Temas_del_Curso.docx, Presentacion_Multicolinealidad_Mincer.pptx, Presentacion_Beamer.tex, Beamer_Overleaf.zip")

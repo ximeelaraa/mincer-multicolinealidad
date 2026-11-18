@@ -1,16 +1,28 @@
 # %% [markdown]
 # # Multicolinealidad en la ecuación de salarios de Mincer
-# ## Proyecto de Fundamentos de Econometría — todos los temas del segundo parcial con datos reales
+# ## Proyecto de Fundamentos de Econometría — Universidad Panamericana
+# **Equipo 4:** Ximena Lara, Camila Ricardi y Sara Enriquez · Prof. César Galindo · Noviembre 2026
 #
-# **Pregunta central:** ¿cuánto aumenta el salario un año más de educación, y qué pasa con nuestras
-# estimaciones cuando los regresores (educación, experiencia, edad, habilidad, entorno familiar) están muy
-# correlacionados entre sí?
+# **Pregunta:** ¿cómo se asocia la escolaridad con el salario mensual de hombres trabajadores en EE. UU.
+# (1980) cuando se comparan personas con igual experiencia, antigüedad, habilidad medida y antecedentes
+# familiares? ¿Qué tan precisamente podemos medir esa asociación si esos controles están correlacionados
+# entre sí (multicolinealidad)?
 #
-# El cuaderno recorre, en el orden de las notas del curso, **todos** los temas: regresión lineal simple,
+# **Hipótesis (α = 5 %, fijado antes de estimar):** $H_0:\beta_{educ}=0$ contra $H_1:\beta_{educ}>0$. Esperamos
+# que la asociación sea positiva pero menor que en la regresión simple, porque la educación también capta
+# habilidad no medida (sesgo por variable omitida). Signos esperados: educ (+), exper (+) con exper² (−),
+# tenure (+), IQ y KWW (+), escolaridad de los padres (+), married (+), black (−), south (−), urban (+), age (?).
+#
+# **Alcance:** la regresión es observacional; identifica **asociaciones condicionadas** a los controles, no
+# efectos causales.
+#
+# **Unidad de análisis:** hombre trabajador · **Población:** cohorte de la NLS de hombres jóvenes (28–38 años)
+# · **Periodo:** 1980 · **n:** 722 · Diccionario de datos y transformaciones: `data/DICCIONARIO.md`.
+#
+# Además, el cuaderno recorre como **material complementario** el resto de los temas del parcial:
 # 4.1–4.9 (supuestos, parámetros, pruebas t y F, dummies, R², precios hedónicos, modelos no anidados,
-# regresión cuantílica, aplicaciones financieras), multicolinealidad (correlaciones, VIF, tolerancia,
-# autovalores, número de condición), MANOVA, y 5.1–5.13 (residuos, heteroscedasticidad, Breusch–Pagan,
-# autocorrelación, Durbin–Watson, Breusch–Godfrey, HAC, modelos dinámicos, rezagos y Jarque–Bera).
+# regresión cuantílica, aplicaciones financieras), MANOVA y 5.1–5.13 (residuos, heteroscedasticidad,
+# autocorrelación, modelos dinámicos, rezagos y Jarque–Bera).
 #
 # **Datos reales**
 #
@@ -113,7 +125,11 @@ df["peduc"] = (df.meduc + df.feduc) / 2
 df["pexper"] = df.age - df.educ - 6
 n = len(df)
 R["n"] = n
+R["n_original"] = len(w2)
 print(f"n = {n} (de {len(w2)} originales)")
+# Archivo de datos utilizado (muestra limpia + transformaciones), documentado en data/DICCIONARIO.md
+(FIG.parent / "data").mkdir(exist_ok=True)
+df.to_csv(FIG.parent / "data" / "wage2_muestra.csv", index=False)
 print(df.head())
 desc = df[["wage", "lwage", "educ", "exper", "tenure", "age", "IQ", "KWW", "meduc", "feduc"]].describe().T
 R["descriptivos"] = desc[["mean", "std", "min", "max"]].round(2).to_dict("index")
@@ -623,6 +639,8 @@ sint
 # %%
 f_c = f_full.replace("exper + I(exper**2)", "exper_c + I(exper_c**2)")
 m_c = smf.ols(f_c, df).fit()
+# Modelo preferido: TODOS los controles, con la experiencia centrada (no se elimina ninguna variable)
+m_pref, f_pref = m_c, f_c
 Z_h = StandardScaler().fit_transform(df[["IQ", "KWW", "meduc", "feduc"]])
 pca = PCA().fit(Z_h)
 df["cp1"] = pca.transform(Z_h)[:, 0]
@@ -647,6 +665,7 @@ R["comparacion"] = comp.to_dict("index")
 R["pca"] = dict(var=pca.explained_variance_ratio_.tolist(), cargas=pca.components_[0].tolist())
 R["ridge"] = dict(alpha=ridge.alpha_, ols=dict(zip(Xr.columns, ols_std.coef_)), ridge=dict(zip(Xr.columns, ridge.coef_)))
 R["vif_centrado_max"] = vmax(m_c)
+R["vif_centrado"] = vif_tabla(pd.DataFrame(m_c.model.exog, columns=m_c.model.exog_names).drop(columns="Intercept")).VIF.to_dict()
 R["vif_reducido"] = vif_tabla(pd.DataFrame(m_red.model.exog, columns=m_red.model.exog_names).drop(columns="Intercept")).VIF.to_dict()
 print(comp)
 
@@ -680,8 +699,16 @@ guardar("ridge")
 
 fig, ax = plt.subplots(figsize=(8, 4.5))
 ax.errorbar(comp.index, comp.beta_educ, yerr=1.96 * comp.ee_educ, fmt="o", color=AZUL, capsize=6, ms=8)
-ax.set(ylabel="β educ (IC 95%)", title="Retorno a la educación según la especificación")
+ax.set(ylabel="β educ (IC 95%)", title="Coeficiente de educ según la especificación")
 guardar("educ")
+
+# %% [markdown]
+# **Lectura (y qué NO hacer):** el **modelo preferido** es el *Centrado*: conserva todos los controles que la
+# teoría justifica y sólo centra la experiencia, lo que elimina la colinealidad estructural exper–exper² sin cambiar
+# R² ni β_educ. *Reducido* (quita age y KWW, promedia los padres) y *PCA* son **análisis de sensibilidad**, no la
+# especificación principal: eliminar controles sólo para bajar un VIF cambia la pregunta (ya no se compara a
+# personas con igual habilidad medida). Que β_educ apenas se mueva (0.041–0.048) indica que la conclusión es robusta.
+# La caída grande ocurre entre *Base* y *Completo*: eso es sesgo por variable omitida, no multicolinealidad.
 
 # %% [markdown]
 # ## 12. MANOVA (no es una prueba de multicolinealidad)
@@ -700,19 +727,19 @@ print(st)
 # propiedad de las **columnas de X**. Son preguntas distintas.
 
 # %% [markdown]
-# ## 13. (5.1–5.2) Distribución de los residuos y diagnóstico gráfico (modelo reducido)
+# ## 13. (5.1–5.2) Distribución de los residuos y diagnóstico gráfico (modelo preferido)
 
 # %%
-infl = OLSInfluence(m_red)
+infl = OLSInfluence(m_pref)
 fig, axs = plt.subplots(2, 2, figsize=(11, 8))
-axs[0, 0].scatter(m_red.fittedvalues, m_red.resid, s=10, color=AZUL, alpha=.4)
+axs[0, 0].scatter(m_pref.fittedvalues, m_pref.resid, s=10, color=AZUL, alpha=.4)
 axs[0, 0].axhline(0, color=TINTA)
 axs[0, 0].set(title="Residuos vs ajustados", xlabel=r"$\hat y$", ylabel=r"$\hat\varepsilon$")
-sm.qqplot(m_red.resid, line="s", ax=axs[0, 1], markersize=3, alpha=.5)
+sm.qqplot(m_pref.resid, line="s", ax=axs[0, 1], markersize=3, alpha=.5)
 axs[0, 1].set_title("Q–Q de residuos")
-axs[1, 0].hist(m_red.resid, bins=35, color=AZUL, alpha=.75, density=True)
-xs = np.linspace(m_red.resid.min(), m_red.resid.max(), 200)
-axs[1, 0].plot(xs, stats.norm.pdf(xs, 0, m_red.resid.std()), color=NARANJA, lw=2)
+axs[1, 0].hist(m_pref.resid, bins=35, color=AZUL, alpha=.75, density=True)
+xs = np.linspace(m_pref.resid.min(), m_pref.resid.max(), 200)
+axs[1, 0].plot(xs, stats.norm.pdf(xs, 0, m_pref.resid.std()), color=NARANJA, lw=2)
 axs[1, 0].set_title("Histograma vs normal")
 axs[1, 1].scatter(infl.hat_matrix_diag, infl.cooks_distance[0], s=10, color=TINTA, alpha=.5)
 axs[1, 1].set(title="Leverage vs distancia de Cook", xlabel="leverage", ylabel="Cook")
@@ -726,32 +753,50 @@ R["n_cook_4n"] = int((infl.cooks_distance[0] > 4 / n).sum())
 # (4) comparar con $\chi^2_q$.
 
 # %%
-e2 = m_red.resid ** 2
-aux = sm.OLS(e2, m_red.model.exog).fit()
+e2 = m_pref.resid ** 2
+aux = sm.OLS(e2, m_pref.model.exog).fit()
 q_bp = int(aux.df_model)
 LM_manual = n * aux.rsquared
-bp = het_breuschpagan(m_red.resid, m_red.model.exog)
-wh = het_white(m_red.resid, m_red.model.exog)
+bp = het_breuschpagan(m_pref.resid, m_pref.model.exog)
+wh = het_white(m_pref.resid, m_pref.model.exog)
 print(f"Manual: R²aux = {aux.rsquared:.4f},  LM = n·R² = {LM_manual:.3f},  χ²({q_bp}) crítico 5% = {stats.chi2.ppf(.95,q_bp):.3f}")
 print(f"statsmodels BP: LM = {bp[0]:.3f}, p = {bp[1]:.4f};   White: LM = {wh[0]:.3f}, p = {wh[1]:.4f}")
-hc = pd.DataFrame({"MCO": m_red.bse}).assign(**{t_: smf.ols(f_red, df).fit(cov_type=t_).bse for t_ in ["HC0", "HC1", "HC2", "HC3"]})
+hc = pd.DataFrame({"MCO": m_pref.bse}).assign(**{t_: smf.ols(f_pref, df).fit(cov_type=t_).bse for t_ in ["HC0", "HC1", "HC2", "HC3"]})
 # FGLS / WLS: modelar la varianza con log(ê²)
-g = sm.OLS(np.log(e2), m_red.model.exog).fit()
+g = sm.OLS(np.log(e2), m_pref.model.exog).fit()
 wts = 1 / np.exp(g.fittedvalues)
-m_wls = smf.wls(f_red, df, weights=wts).fit()
+m_wls = smf.wls(f_pref, df, weights=wts).fit()
 R["hetero"] = dict(R2aux=aux.rsquared, LM=LM_manual, q=q_bp, crit=stats.chi2.ppf(.95, q_bp), bp_p=bp[1],
                    white_LM=wh[0], white_p=wh[1], hc=hc.round(5).to_dict("index"),
                    wls_educ=m_wls.params["educ"], wls_se=m_wls.bse["educ"])
-m_red_rob = smf.ols(f_red, df).fit(cov_type="HC1")
-R["reducido"] = dict(params=m_red.params.to_dict(), bse=m_red.bse.to_dict(), bse_hc1=m_red_rob.bse.to_dict(),
-                     p_hc1=m_red_rob.pvalues.to_dict(), R2=m_red.rsquared, R2a=m_red.rsquared_adj,
-                     exacto={c: 100 * (np.exp(v) - 1) for c, v in m_red.params.items()})
+m_pref_rob = smf.ols(f_pref, df).fit(cov_type="HC1")
+R["preferido"] = dict(params=m_pref.params.to_dict(), bse=m_pref.bse.to_dict(), bse_hc1=m_pref_rob.bse.to_dict(),
+                      p_hc1=m_pref_rob.pvalues.to_dict(), ci_hc1=m_pref_rob.conf_int().values.tolist(),
+                      R2=m_pref.rsquared, R2a=m_pref.rsquared_adj, F=m_pref.fvalue, Fp=m_pref.f_pvalue,
+                      exacto={c: 100 * (np.exp(v) - 1) for c, v in m_pref.params.items()})
 hc
 
 # %% [markdown]
-# **Lectura:** $LM = nR^2_{aux}\approx 20.9 > \chi^2_{10,\,0.05}=18.31$ → Breusch–Pagan rechaza homoscedasticidad
-# al 5% (p ≈ 0.02); White no rechaza (p ≈ 0.27) porque gasta muchos grados de libertad en cuadrados e
-# interacciones. Los errores HC0–HC3 casi no cambian respecto a los clásicos y WLS da un retorno a la educación
+# ### Tabla principal del informe: tres especificaciones con errores robustos (HC1)
+# (1) regresión simple, (2) Mincer básica, (3) modelo preferido con todos los controles y experiencia centrada.
+
+# %%
+tab_main = {}
+for nom, f in [("(1) Simple", "lwage ~ educ"), ("(2) Mincer", f_base.replace("exper + I(exper**2)", "exper_c + I(exper_c**2)")),
+               ("(3) Preferido", f_pref)]:
+    m = smf.ols(f, df).fit(cov_type="HC1")
+    ci = m.conf_int()
+    tab_main[nom] = dict(params=m.params.to_dict(), se=m.bse.to_dict(), p=m.pvalues.to_dict(),
+                         ci={k: ci.loc[k].tolist() for k in m.params.index}, R2=m.rsquared, R2a=m.rsquared_adj,
+                         n=int(m.nobs), F=float(m.fvalue), Fp=float(m.f_pvalue))
+R["tabla_principal"] = tab_main
+pd.DataFrame({k: pd.Series(v["params"]).round(4).astype(str) + " (" + pd.Series(v["se"]).round(4).astype(str) + ")"
+              for k, v in tab_main.items()})
+
+# %% [markdown]
+# **Lectura:** $LM = nR^2_{aux}\approx 24.7 > \chi^2_{13,\,0.05}=22.36$ → Breusch–Pagan rechaza homoscedasticidad
+# al 5% (p ≈ 0.025); White rechaza apenas (p ≈ 0.050), con mucha menor potencia porque gasta grados de libertad en
+# cuadrados e interacciones. Los errores HC0–HC3 casi no cambian respecto a los clásicos y WLS da un retorno a la educación
 # muy parecido: la heteroscedasticidad es leve y no altera las conclusiones. Los coeficientes MCO no cambian al
 # pedir errores robustos; sólo cambia la medición de su incertidumbre.
 
@@ -762,8 +807,8 @@ hc
 # arbitrario y DW cambia si se reordenan. Lo comprobamos y luego usamos una serie de tiempo real.
 
 # %%
-dw_orig = durbin_watson(m_red.resid)
-dw_perm = durbin_watson(m_red.resid.sample(frac=1, random_state=0).values)
+dw_orig = durbin_watson(m_pref.resid)
+dw_perm = durbin_watson(m_pref.resid.sample(frac=1, random_state=0).values)
 print(f"wage2: DW (orden original) = {dw_orig:.3f};  DW (filas reordenadas) = {dw_perm:.3f}")
 R["dw_wage2"] = [dw_orig, dw_perm]
 
@@ -838,21 +883,21 @@ pd.DataFrame(dl_rows)
 # ## 17. (5.13) Prueba de Jarque–Bera: $JB=\frac n6\left(S^2+\frac{(K-3)^2}{4}\right)\sim\chi^2_2$
 
 # %%
-res = m_red.resid
+res = m_pref.resid
 S = stats.skew(res)
 K = stats.kurtosis(res, fisher=False)
 JB_manual = n / 6 * (S ** 2 + (K - 3) ** 2 / 4)
 jb = jarque_bera(res)
 R["jb"] = dict(S=S, K=K, JB=JB_manual, p=jb[1], crit=stats.chi2.ppf(.95, 2), jb_capm=R["finanzas"]["jb"])
 print(f"S = {S:.4f}, K = {K:.4f}, JB = {JB_manual:.2f} (statsmodels {jb[0]:.2f}), p = {jb[1]:.2e}, crítico χ²(2) = 5.991")
-reset = linear_reset(m_red, power=3, use_f=True)
+reset = linear_reset(m_pref, power=3, use_f=True)
 R["reset"] = dict(F=float(reset.fvalue), p=float(reset.pvalue))
 print(f"RESET: F = {reset.fvalue:.3f}, p = {reset.pvalue:.3f}")
 
 # %% [markdown]
-# **Lectura:** JB ≈ 114 ≫ 5.99 → se rechaza normalidad (colas pesadas: K ≈ 4.8, y asimetría negativa).
+# **Lectura:** JB ≈ 132 ≫ 5.99 → se rechaza normalidad (colas pesadas: K ≈ 5.0, y asimetría negativa).
 # Con n = 722 la inferencia es válida asintóticamente; rechazar JB **no** implica sesgo de MCO.
-# RESET (p ≈ 0.43) no detecta problemas de forma funcional.
+# RESET (p ≈ 0.36) no detecta problemas de forma funcional.
 
 # %% [markdown]
 # ## 18. Inferencia vs predicción (scikit-learn)
