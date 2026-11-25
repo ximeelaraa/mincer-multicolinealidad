@@ -13,53 +13,60 @@
 \usepackage{amsmath,amssymb,booktabs,graphicx,tikz}
 \usepackage[most]{tcolorbox}
 \graphicspath{{figuras/}}
-\definecolor{rosa}{HTML}{D6457A}
-\definecolor{rosaclaro}{HTML}{FCE4EC}
-\definecolor{blush}{HTML}{FFF7FA}
-\definecolor{ciruela}{HTML}{5E2750}
-\definecolor{lila}{HTML}{8E5CC4}
-\definecolor{lilaclaro}{HTML}{EDE3F7}
-\definecolor{texto}{HTML}{4A3B47}
-\definecolor{gris}{HTML}{9A8C98}
-\newcommand{\corazon}{\ensuremath{\heartsuit}}
+\definecolor{rosa}{HTML}{FCE4EC}
+\definecolor{rosaf}{HTML}{C2407A}
+\definecolor{lila}{HTML}{EDE3F7}
+\definecolor{lilaf}{HTML}{7B57B8}
+\definecolor{menta}{HTML}{DDF3EA}
+\definecolor{mentaf}{HTML}{2E8B6E}
+\definecolor{celeste}{HTML}{DCEBFA}
+\definecolor{celestef}{HTML}{3C78B5}
+\definecolor{durazno}{HTML}{FFE7D6}
+\definecolor{duraznof}{HTML}{C46A3A}
+\definecolor{tinta}{HTML}{3D3553}
+\definecolor{texto}{HTML}{4A4458}
+\definecolor{gris}{HTML}{9A93A3}
+\definecolor{crema}{HTML}{FFFBF7}
+\definecolor{borde}{HTML}{E7E2EC}
 \AtBeginDocument{\hyphenpenalty=10000\exhyphenpenalty=10000}
 \setbeamercolor{normal text}{fg=texto}
-\setbeamercolor{structure}{fg=rosa}
-\setbeamercolor{alerted text}{fg=lila}
+\setbeamercolor{structure}{fg=lilaf}
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{background}{%
   \begin{tikzpicture}
   \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
-  \fill[blush] (0,0) rectangle (\paperwidth,\paperheight);
-  \fill[rosaclaro] (\paperwidth,\paperheight) circle (1.5cm);
-  \fill[lilaclaro] (\paperwidth-1.75cm,\paperheight-1.45cm) circle (0.13cm);
-  \fill[rosaclaro] (0,0) circle (0.9cm);
+  \fill[crema] (0,0) rectangle (\paperwidth,\paperheight);
+  \fill[durazno] (\paperwidth,\paperheight) circle (1.5cm);
+  \fill[menta] (\paperwidth-1.75cm,\paperheight-1.45cm) circle (0.14cm);
+  \fill[celeste] (0,0) circle (0.9cm);
   \end{tikzpicture}}
+\newcommand{\subrayado}{\tikz{\foreach \c/\x in {rosaf/0,lila/0.6,menta/1.2,celeste/1.8}
+  \draw[\c,line width=3pt,line cap=round] (\x cm,0)--(\x cm+0.42cm,0);}}
 \setbeamertemplate{frametitle}{%
-  \vspace{0.55em}{\color{rosa}\small\corazon}\hspace{0.45em}{\color{ciruela}\Large\bfseries\insertframetitle}\par
-  \vspace{-0.1em}\hspace{1.35em}\tikz\draw[rosa,line width=2.6pt,line cap=round] (0,0)--(1.6cm,0);\par}
+  \vspace{0.55em}{\color{tinta}\Large\bfseries\insertframetitle}\par
+  \vspace{0.05em}\hspace{0.1em}\subrayado\par}
 \setbeamertemplate{footline}{%
   \hspace{1.6em}\raisebox{0.75em}{\tiny\color{gris}Equipo 4 $\cdot$ Fundamentos de Econometría}\hfill
-  \raisebox{0.45em}{\tikz\node[circle,fill=rosa,text=white,inner sep=0pt,minimum size=1.35em,font=\tiny\bfseries]{\insertframenumber};}\hspace{1.2em}}
-\setbeamertemplate{itemize item}{\color{rosa}\corazon}
-\setbeamertemplate{enumerate item}{\tikz[baseline=(n.base)]\node[circle,fill=rosa,text=white,inner sep=0pt,minimum size=1.3em,font=\footnotesize\bfseries](n){\insertenumlabel};}
-\newcommand{\pastilla}[2][rosaclaro]{\tikz[baseline=(p.base)]\node[fill=#1,rounded corners=7pt,inner xsep=9pt,inner ysep=4pt,text=ciruela,font=\small\bfseries](p){#2};}
-\newtcolorbox{tarjeta}[1][rosaclaro]{enhanced,colback=white,colframe=#1,boxrule=1pt,arc=9pt,left=6pt,right=6pt,top=4pt,bottom=4pt}
+  \raisebox{0.45em}{\tikz\node[circle,fill=lila,text=lilaf,inner sep=0pt,minimum size=1.35em,font=\tiny\bfseries]{\insertframenumber};}\hspace{1.2em}}
+\setbeamertemplate{itemize item}{\tikz[baseline=-0.6ex]\fill[celestef] (0,0) circle (0.09cm);}
+\setbeamertemplate{enumerate item}{\ifcase\value{enumi}\or\def\tono{rosa}\or\def\tono{celeste}\or\def\tono{menta}\else\def\tono{lila}\fi
+  \tikz[baseline=(n.base)]\node[circle,fill=\tono,text=\tono f,inner sep=0pt,minimum size=1.3em,font=\footnotesize\bfseries](n){\insertenumlabel};}
+\newcommand{\pastilla}[2][rosa]{\tikz[baseline=(p.base)]\node[fill=#1,rounded corners=7pt,inner xsep=9pt,inner ysep=4pt,text=#1f,font=\small\bfseries](p){#2};}
 \newcommand{\dato}[3][rosa]{%
-  \begin{tcolorbox}[enhanced,width=0.31\textwidth,height=2.75cm,valign=center,nobeforeafter,box align=top,colback=white,
-    colframe=#1!25,boxrule=1pt,arc=10pt,left=5pt,right=5pt,halign=center]
-  \hyphenpenalty=10000{\fontsize{21}{25}\selectfont\color{#1}\textbf{#2}}\\[0.45em]{\small #3}\end{tcolorbox}}
-\newcommand{\mensaje}[1]{\par\vfill
-  \begin{tcolorbox}[enhanced,colback=rosa,colframe=rosa,boxrule=0pt,arc=11pt,halign=center,left=8pt,right=8pt,top=4pt,bottom=4pt]
-  \hyphenpenalty=10000\color{white}\bfseries\corazon\ \ #1\end{tcolorbox}\vspace{0.1em}}
-\newcommand{\figura}[1]{\begin{tarjeta}\includegraphics[width=\linewidth]{#1}\end{tarjeta}}
+  \begin{tcolorbox}[enhanced,width=0.31\textwidth,height=2.75cm,valign=center,nobeforeafter,box align=top,colback=#1,
+    colframe=#1,boxrule=0pt,arc=10pt,left=5pt,right=5pt,halign=center]
+  {\fontsize{21}{25}\selectfont\color{#1f}\textbf{#2}}\\[0.45em]{\small #3}\end{tcolorbox}}
+\newcommand{\mensaje}[2][lila]{\par\vfill
+  \begin{tcolorbox}[enhanced,colback=#1,colframe=#1,boxrule=0pt,arc=11pt,halign=center,left=8pt,right=8pt,top=4pt,bottom=4pt]
+  \color{#1f}\bfseries #2\end{tcolorbox}\vspace{0.1em}}
+\newcommand{\figura}[1]{\begin{tcolorbox}[enhanced,colback=white,colframe=borde,boxrule=0.8pt,arc=9pt,left=4pt,right=4pt,top=4pt,bottom=4pt]\includegraphics[width=\linewidth]{#1}\end{tcolorbox}}
 \setbeamertemplate{title page}{%
   \vspace{1.2em}
-  \pastilla[rosa]{\color{white}Fundamentos de Econometría}\par\vspace{1em}
-  {\fontsize{26}{30}\selectfont\color{ciruela}\bfseries\inserttitle\par}\vspace{0.6em}
-  \parbox{0.72\textwidth}{\raggedright\large\color{rosa}\insertsubtitle}\par\vspace{1.6em}
+  \pastilla[celeste]{Fundamentos de Econometría}\par\vspace{1em}
+  {\fontsize{26}{30}\selectfont\color{tinta}\bfseries\inserttitle\par}\vspace{0.6em}
+  \parbox{0.68\textwidth}{\raggedright\large\color{lilaf}\insertsubtitle}\par\vspace{1.6em}
   {\small\color{gris}\bfseries Equipo 4}\par\vspace{0.4em}
-  \pastilla{Ximena Lara}\hspace{0.5em}\pastilla{Camila Ricardi}\hspace{0.5em}\pastilla{Sara Enriquez}\par\vspace{1.4em}
+  \pastilla[rosa]{Ximena Lara}\hspace{0.5em}\pastilla[lila]{Camila Ricardi}\hspace{0.5em}\pastilla[menta]{Sara Enriquez}\par\vspace{1.4em}
   {\small\color{texto}\insertinstitute\ $\cdot$ \insertdate\par}}
 
 \title{Escolaridad, habilidad y salario}
@@ -72,31 +79,31 @@
 {\setbeamertemplate{background}{%
   \begin{tikzpicture}
   \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
-  \fill[blush] (0,0) rectangle (\paperwidth,\paperheight);
-  \fill[rosaclaro] (\paperwidth+0.4cm,\paperheight+0.3cm) circle (3.6cm);
-  \fill[lilaclaro] (\paperwidth-2.6cm,\paperheight-4.3cm) circle (0.3cm);
-  \fill[rosa] (\paperwidth-1.2cm,\paperheight-5.4cm) circle (0.12cm);
-  \fill[rosaclaro] (-0.3cm,-0.3cm) circle (1.9cm);
-  \node[text=rosa,font=\Large] at (\paperwidth-2.3cm,1.4cm) {\corazon};
+  \fill[crema] (0,0) rectangle (\paperwidth,\paperheight);
+  \fill[rosa] (\paperwidth+0.4cm,\paperheight+0.3cm) circle (3.6cm);
+  \fill[lila] (\paperwidth-3.3cm,\paperheight-4.3cm) circle (0.75cm);
+  \fill[menta] (\paperwidth-1.3cm,\paperheight-6.2cm) circle (0.5cm);
+  \fill[durazno] (\paperwidth-2.7cm,1.0cm) circle (0.22cm);
+  \fill[celeste] (-0.3cm,-0.3cm) circle (1.9cm);
   \end{tikzpicture}}
 \begin{frame}[plain]\titlepage\end{frame}}
 
 \begin{frame}{La pregunta}
 \vspace{0.3em}
-{\Large\color{ciruela}\textbf{¿Cuánto más gana alguien con un año más de escuela, comparado con alguien igual en experiencia, habilidad y familia?}}
+{\Large\color{tinta}\textbf{¿Cuánto más gana alguien con un año más de escuela, comparado con alguien igual en experiencia, habilidad y familia?}}
 \vspace{1em}
 
-\dato{$H_1:\beta>0$}{esperamos una relación positiva}\hfill
-\dato{$\alpha=5\%$}{nivel de significancia fijado antes de estimar}\hfill
-\dato[lila]{$\neq$ causa}{datos observacionales: medimos asociación}
-\mensaje{Reto: escolaridad, habilidad y familia se mueven juntas $\to$ multicolinealidad}
+\dato[rosa]{$H_1:\beta>0$}{esperamos una relación positiva}\hfill
+\dato[celeste]{$\alpha=5\%$}{nivel de significancia fijado antes de estimar}\hfill
+\dato[durazno]{$\neq$ causa}{datos observacionales: medimos asociación}
+\mensaje[lila]{Reto: escolaridad, habilidad y familia se mueven juntas $\to$ multicolinealidad}
 \end{frame}
 
 \begin{frame}{Datos}
 \vspace{0.3em}
-\dato{722}{hombres trabajadores de 28 a 38 años}\hfill
-\dato{1980}{EE.\,UU., encuesta NLS (corte transversal)}\hfill
-\dato{13}{variables explicativas}
+\dato[lila]{722}{hombres trabajadores de 28 a 38 años}\hfill
+\dato[menta]{1980}{EE.\,UU., encuesta NLS (corte transversal)}\hfill
+\dato[celeste]{13}{variables explicativas}
 \vspace{1em}
 \begin{itemize}
 \item Fuente: base WAGE2 de Wooldridge (Blackburn y Neumark, 1992), consultada el 18/11/2026.
@@ -107,15 +114,15 @@
 \end{frame}
 
 \begin{frame}{El modelo}
-\begin{tcolorbox}[enhanced,colback=white,colframe=rosaclaro,boxrule=1pt,arc=12pt,halign=center,top=1pt,bottom=1pt]
+\begin{tcolorbox}[enhanced,colback=menta,colframe=menta,boxrule=0pt,arc=12pt,halign=center,top=1pt,bottom=1pt]
 \[
-\color{rosa}\ln(\text{salario})=\beta_0+\beta_1\,\text{escolaridad}+\text{experiencia}+\text{controles}+u
+\color{mentaf}\ln(\text{salario})=\beta_0+\beta_1\,\text{escolaridad}+\text{experiencia}+\text{controles}+u
 \]
 \end{tcolorbox}
 \centering\small
-\rowcolors{2}{white}{rosaclaro}
+\rowcolors{2}{white}{celeste}
 \begin{tabular}{lll}
-\rowcolor{rosa}\color{white}\textbf{Grupo} & \color{white}\textbf{Variables} & \color{white}\textbf{Signo esperado}\\
+\rowcolor{lila}\color{lilaf}\textbf{Grupo} & \color{lilaf}\textbf{Variables} & \color{lilaf}\textbf{Signo esperado}\\
 De interés & escolaridad (educ) & $+$\\
 Experiencia & exper (centrada), exper$^2$, antigüedad, edad & $+$\\
 Habilidad & IQ, KWW (prueba de conocimiento laboral) & $+$\\
@@ -132,55 +139,55 @@ Dummies & casado, afroamericano, sur, urbano & $+\ -\ -\ +$\\
 \column{0.58\textwidth}
 \figura{pasos_educ}
 \column{0.4\textwidth}
-{\LARGE\color{rosa}\textbf{6.0\,\% $\to$ 4.2\,\%}}\\[0.6em]
-{\color{ciruela}Al comparar personas con igual habilidad y familia, la asociación baja casi a la mitad.}
+{\LARGE\color{lilaf}\textbf{6.0\,\% $\to$ 4.2\,\%}}\\[0.6em]
+{\color{tinta}Al comparar personas con igual habilidad y familia, la asociación baja casi a la mitad.}
 \end{columns}
-\mensaje{Parte de lo que parecía «escuela» era habilidad: sesgo por variable omitida}
+\mensaje[durazno]{Parte de lo que parecía «escuela» era habilidad: sesgo por variable omitida}
 \end{frame}
 
 \begin{frame}{¿Qué significa?}
 \vspace{0.3em}
-\dato{$+$4.2\,\%}{de salario por un año más de escuela ($\approx$ 41 USD al mes)}\hfill
-\dato{2--6\,\%}{intervalo de confianza 95\,\%: no incluye 0 $\to$ se rechaza $H_0$}\hfill
-\dato{$+$18\,\%}{con 4 años de universidad: relevante, no solo significativo}
+\dato[rosa]{$+$4.2\,\%}{de salario por un año más de escuela ($\approx$ 41 USD al mes)}\hfill
+\dato[celeste]{2--6\,\%}{intervalo de confianza 95\,\%: no incluye 0 $\to$ se rechaza $H_0$}\hfill
+\dato[menta]{$+$18\,\%}{con 4 años de universidad: relevante, no solo significativo}
 \vspace{1.2em}
 
 \centering Otros: casado +22\,\% $\cdot$ urbano +20\,\% $\cdot$ sur $-$7\,\% $\cdot$ IQ: $+$5\,\% por desviación estándar.
-\mensaje{Todo «manteniendo constantes las demás variables»}
+\mensaje[lila]{Todo «manteniendo constantes las demás variables»}
 \end{frame}
 
 \begin{frame}{Multicolinealidad: ¿dónde está?}
 \begin{columns}[c]
 \column{0.54\textwidth}
-\figura{vif_rosa}
+\figura{vif_pastel}
 \column{0.44\textwidth}
-{\color{lila}\textbf{VIF de 24: artificio}}\\ exper$^2$ se construye con exper.\\ Al centrar: VIF máx.\ 2.2.\\[1em]
-{\color{rosa}\textbf{Real pero moderada:}}\\ escolaridad $\leftrightarrow$ IQ $\leftrightarrow$ KWW $\leftrightarrow$ padres (VIF 1.6--2.2).
+{\color{duraznof}\textbf{VIF de 24: artificio}}\\ exper$^2$ se construye con exper.\\ Al centrar: VIF máx.\ 2.2.\\[1em]
+{\color{mentaf}\textbf{Real pero moderada:}}\\ escolaridad $\leftrightarrow$ IQ $\leftrightarrow$ KWW $\leftrightarrow$ padres (VIF 1.6--2.2).
 \end{columns}
-\mensaje{Un VIF alto no se arregla quitando variables: primero hay que entender de dónde viene}
+\mensaje[celeste]{Un VIF alto no se arregla quitando variables: primero hay que entender de dónde viene}
 \end{frame}
 
 \begin{frame}{¿Nos impide responder?}
 \vspace{0.3em}
-\dato[lila]{$\times$1.5}{error estándar de escolaridad inflado por la correlación}\hfill
-\dato{$F=5.4$}{IQ, KWW y padres: solos no significativos, juntos sí ($p<0.001$)}\hfill
-\dato{4.8--4.9\,\%}{si quitamos o combinamos controles (vs 4.2\,\%): casi igual}
-\mensaje{No: el intervalo de escolaridad sigue lejos de cero. Solo cuesta separar los controles entre sí}
+\dato[durazno]{$\times$1.5}{error estándar de escolaridad inflado por la correlación}\hfill
+\dato[lila]{$F=5.4$}{IQ, KWW y padres: solos no significativos, juntos sí ($p<0.001$)}\hfill
+\dato[menta]{4.8--4.9\,\%}{si quitamos o combinamos controles (vs 4.2\,\%): casi igual}
+\mensaje[rosa]{No: el intervalo de escolaridad sigue lejos de cero. Solo cuesta separar los controles entre sí}
 \end{frame}
 
 \begin{frame}{¿Se cumplen los supuestos?}
 \vspace{0.6em}
 \centering
-\rowcolors{2}{white}{rosaclaro}
+\rowcolors{2}{white}{celeste}
 \small\renewcommand{\arraystretch}{1.45}
 \begin{tabular}{lll}
-\rowcolor{rosa}\color{white}\textbf{Revisión} & \color{white}\textbf{Resultado} & \color{white}\textbf{Qué hicimos}\\
+\rowcolor{lila}\color{lilaf}\textbf{Revisión} & \color{lilaf}\textbf{Resultado} & \color{lilaf}\textbf{Qué hicimos}\\
 Varianza constante (Breusch--Pagan) & $p=0.025$ $\to$ no & Errores robustos HC1\\
 Forma funcional (RESET) & $p=0.36$ $\to$ bien & Nada\\
 Normalidad (Jarque--Bera) & $p<0.001$ $\to$ no & Con $n=722$ no afecta\\
 Exogeneidad & No se puede probar & Hablamos de asociación\\
 \end{tabular}
-\mensaje{Ningún problema cambia la conclusión}
+\mensaje[menta]{Ningún problema cambia la conclusión}
 \end{frame}
 
 \begin{frame}{Conclusiones}
@@ -192,20 +199,20 @@ Exogeneidad & No se puede probar & Hablamos de asociación\\
 \item Limitaciones: no es causal $\cdot$ posible selección $\cdot$ solo hombres de EE.\,UU. en 1980.
 \end{enumerate}
 \normalsize
-\mensaje{¿Qué cambiaría la conclusión? Incluir o no la habilidad: 6.0\,\% $\to$ 4.2\,\%}
+\mensaje[durazno]{¿Qué cambiaría la conclusión? Incluir o no la habilidad: 6.0\,\% $\to$ 4.2\,\%}
 \end{frame}
 
 \begin{frame}{Gracias $\cdot$ ¿preguntas?}
 \vspace{0.3em}
-\begin{tcolorbox}[enhanced,colback=rosaclaro,colframe=rosaclaro,arc=12pt,halign=center]
-{\color{ciruela}\bfseries En una frase: un año más de escuela se asocia con $+$4.2\,\% de salario,\\ y la multicolinealidad no nos impide medirlo.}
+\begin{tcolorbox}[enhanced,colback=lila,colframe=lila,boxrule=0pt,arc=12pt,halign=center]
+{\color{lilaf}\bfseries En una frase: un año más de escuela se asocia con $+$4.2\,\% de salario,\\ y la multicolinealidad no nos impide medirlo.}
 \end{tcolorbox}
 \begin{itemize}
 \item Código, datos y diccionario: \texttt{github.com/ximeelaraa/mincer-multicolinealidad}
 \item Fuentes: Blackburn y Neumark (1992) $\cdot$ Mincer (1974) $\cdot$ Wooldridge (2020) $\cdot$ Galindo (2026)
 \end{itemize}
 \vfill
-\centering\pastilla{Ximena Lara}\hspace{0.5em}\pastilla{Camila Ricardi}\hspace{0.5em}\pastilla{Sara Enriquez}
+\centering\pastilla[rosa]{Ximena Lara}\hspace{0.5em}\pastilla[lila]{Camila Ricardi}\hspace{0.5em}\pastilla[menta]{Sara Enriquez}
 \vspace{0.6em}
 \end{frame}
 \end{document}

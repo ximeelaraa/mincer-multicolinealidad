@@ -34,10 +34,12 @@ cuatro = pct(4 * b3)
 se_ratio = np.sqrt(VF["educ"]["VIF"])
 lo, hi = sorted([pct(C["Reducido"]["beta_educ"]), pct(C["PCA"]["beta_educ"])])
 
-# ------------------------------------------------------------------ paleta (rosa)
-ROSA_H, ROSACL_H, BLUSH_H, CIRUELA_H, LILA_H, TEXTO_H, GRIS_H = (
-    "#D6457A", "#FCE4EC", "#FFF7FA", "#5E2750", "#8E5CC4", "#4A3B47", "#9A8C98")
-MALVA_H = "#B9A7B4"  # puntos de referencia en las gráficas
+# ------------------------------------------------------------------ paleta (pastel)
+# Pastel: (fondo claro, tono fuerte para texto y marcas)
+PASTEL = {"rosa": ("#FCE4EC", "#C2407A"), "lila": ("#EDE3F7", "#7B57B8"), "menta": ("#DDF3EA", "#2E8B6E"),
+          "celeste": ("#DCEBFA", "#3C78B5"), "durazno": ("#FFE7D6", "#C46A3A")}
+TINTA_H, TEXTO_H, GRIS_H, CREMA_H = "#3D3553", "#4A4458", "#9A93A3", "#FFFBF7"
+MALVA_H = "#B7B0BF"  # puntos de referencia en las gráficas
 plt.rcParams["font.family"] = ["Avenir Next", "Avenir", "DejaVu Sans"]
 
 # ------------------------------------------------------------------ figura: el número clave en tres pasos
@@ -47,19 +49,19 @@ vals = [e1, e2, e3]
 cis = [[pct(x) for x in M["ci"]["educ"]] for M in (M1, M2, M3)]
 x = np.arange(3)
 for i in range(3):
-    col = ROSA_H if i == 2 else MALVA_H
+    col = PASTEL["lila"][1] if i == 2 else MALVA_H
     ax.plot([x[i], x[i]], cis[i], color=col, lw=2.2, solid_capstyle="round")
     ax.scatter(x[i], vals[i], s=110 if i == 2 else 85, color=col, zorder=3, edgecolor="white", linewidth=2)
-    ax.text(x[i] + .1, vals[i], f"{vals[i]:.1f}%", va="center", fontsize=13, color=CIRUELA_H,
+    ax.text(x[i] + .1, vals[i], f"{vals[i]:.1f}%", va="center", fontsize=13, color=TINTA_H,
             fontweight="bold" if i == 2 else "normal")
-ax.set_xticks(x, etiquetas, fontsize=10, color=CIRUELA_H)
+ax.set_xticks(x, etiquetas, fontsize=10, color=TINTA_H)
 ax.set_ylabel("% más salario por un año más de escuela", fontsize=9.5, color=TEXTO_H)
 ax.set_ylim(0, 10.5)
 ax.set_xlim(-.4, 2.6)
-ax.grid(axis="y", color="#F3E3EA", lw=.8)
+ax.grid(axis="y", color="#ECE8F0", lw=.8)
 for s in ("top", "right", "left"):
     ax.spines[s].set_visible(False)
-ax.spines["bottom"].set_color("#E8CFDA")
+ax.spines["bottom"].set_color("#DCD6E2")
 ax.tick_params(axis="y", colors=GRIS_H, length=0)
 ax.tick_params(axis="x", length=0)
 ax.set_axisbelow(True)
@@ -77,30 +79,30 @@ orden = sorted(NOMBRES, key=lambda k: VF[k]["VIF"])
 fig, ax = plt.subplots(figsize=(7.2, 4.6), dpi=200)
 for i, k in enumerate(orden):
     antes, despues = VF[k]["VIF"], R["vif_centrado"][CENT.get(k, k)]
-    ax.plot([despues, antes], [i, i], color="#EBD3DE", lw=3, solid_capstyle="round", zorder=1)
+    ax.plot([despues, antes], [i, i], color="#E3DDEA", lw=3, solid_capstyle="round", zorder=1)
     ax.scatter(antes, i, s=60, color=MALVA_H, zorder=2, edgecolor="white", linewidth=1.5)
-    ax.scatter(despues, i, s=60, color=ROSA_H, zorder=3, edgecolor="white", linewidth=1.5)
+    ax.scatter(despues, i, s=60, color=PASTEL["menta"][1], zorder=3, edgecolor="white", linewidth=1.5)
     if k in CENT:
         ax.text(antes + .7, i, f"{antes:.0f}", va="center", fontsize=10, color=TEXTO_H)
-        ax.text(despues + .7, i + .42, f"{despues:.1f}", va="center", fontsize=10, color=CIRUELA_H, fontweight="bold")
+        ax.text(despues + .7, i + .42, f"{despues:.1f}", va="center", fontsize=10, color=TINTA_H, fontweight="bold")
 ax.axvline(10, color=GRIS_H, lw=1, ls=(0, (3, 3)), zorder=0)
 ax.text(10.3, -.6, "regla común: 10", fontsize=8.5, color=GRIS_H, va="center")
-ax.set_yticks(range(len(orden)), [NOMBRES[k] for k in orden], fontsize=9.5, color=CIRUELA_H)
+ax.set_yticks(range(len(orden)), [NOMBRES[k] for k in orden], fontsize=9.5, color=TINTA_H)
 ax.set_xlabel("VIF (factor de inflación de la varianza)", fontsize=9.5, color=TEXTO_H)
 ax.set_xlim(0, 27)
 ax.set_ylim(-1, len(orden))
-ax.grid(axis="x", color="#F3E3EA", lw=.8)
+ax.grid(axis="x", color="#ECE8F0", lw=.8)
 for s in ("top", "right", "left"):
     ax.spines[s].set_visible(False)
-ax.spines["bottom"].set_color("#E8CFDA")
+ax.spines["bottom"].set_color("#DCD6E2")
 ax.tick_params(length=0, colors=GRIS_H)
-ax.tick_params(axis="y", colors=CIRUELA_H)
+ax.tick_params(axis="y", colors=TINTA_H)
 ax.set_axisbelow(True)
 ax.scatter([], [], s=60, color=MALVA_H, label="experiencia sin centrar")
-ax.scatter([], [], s=60, color=ROSA_H, label="experiencia centrada")
+ax.scatter([], [], s=60, color=PASTEL["menta"][1], label="experiencia centrada")
 ax.legend(loc="lower right", frameon=False, fontsize=9, labelcolor=TEXTO_H)
 fig.tight_layout()
-fig.savefig(FIG / "vif_rosa.png", facecolor="white")
+fig.savefig(FIG / "vif_pastel.png", facecolor="white")
 plt.close(fig)
 
 # ------------------------------------------------------------------ contenido (común a PowerPoint y Beamer)
@@ -143,13 +145,14 @@ QUIEN = {"pregunta": "Ximena", "datos": "Ximena", "modelo": "Ximena", "resultado
 
 # ------------------------------------------------------------------ POWERPOINT
 hexrgb = lambda h: RGBColor.from_string(h.lstrip("#"))
-ROSA, ROSACL, BLUSH, CIRUELA, LILA, TXT, SUAVE = map(hexrgb, (ROSA_H, ROSACL_H, BLUSH_H, CIRUELA_H, LILA_H, TEXTO_H, GRIS_H))
-BL, LILACL = RGBColor(255, 255, 255), hexrgb("#EDE3F7")
+P = {k: (hexrgb(a), hexrgb(b)) for k, (a, b) in PASTEL.items()}  # (claro, fuerte)
+TINTA, TXT, SUAVE, CREMA, BL = hexrgb(TINTA_H), hexrgb(TEXTO_H), hexrgb(GRIS_H), hexrgb(CREMA_H), RGBColor(255, 255, 255)
 FUENTE = "Avenir Next"
 prs = Presentation()
 prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
 BLANK = prs.slide_layouts[6]
 cnt = [0]
+ORDEN_MSJ = ["lila", "menta", "celeste", "durazno", "rosa"]
 
 
 def caja(sl, x, y, w, h, texto, size=20, color=TXT, bold=False, centro=False):
@@ -183,46 +186,52 @@ def forma(sl, tipo, x, y, w, h, relleno=None, linea=None, grosor=1.25, radio=Non
 
 def fondo(sl, portada=False):
     sl.background.fill.solid()
-    sl.background.fill.fore_color.rgb = BLUSH
+    sl.background.fill.fore_color.rgb = CREMA
     if portada:
-        forma(sl, MSO_SHAPE.OVAL, 9.6, -2.2, 5.6, 5.6, ROSACL)
-        forma(sl, MSO_SHAPE.OVAL, -1.6, 5.1, 3.6, 3.6, ROSACL)
-        forma(sl, MSO_SHAPE.OVAL, 11.0, 3.4, .55, .55, LILACL)
-        forma(sl, MSO_SHAPE.OVAL, 11.9, 4.0, .3, .3, ROSA)
-        forma(sl, MSO_SHAPE.HEART, 11.6, 5.7, .5, .45, ROSA)
+        forma(sl, MSO_SHAPE.OVAL, 9.6, -2.2, 5.6, 5.6, P["rosa"][0])
+        forma(sl, MSO_SHAPE.OVAL, 8.7, 1.9, 2.0, 2.0, P["lila"][0])
+        forma(sl, MSO_SHAPE.OVAL, -1.6, 5.1, 3.6, 3.6, P["celeste"][0])
+        forma(sl, MSO_SHAPE.OVAL, 11.2, 4.6, 1.3, 1.3, P["menta"][0])
+        forma(sl, MSO_SHAPE.OVAL, 10.6, 6.3, .5, .5, P["durazno"][0])
     else:
-        forma(sl, MSO_SHAPE.OVAL, 12.0, -1.15, 2.3, 2.3, ROSACL)
-        forma(sl, MSO_SHAPE.OVAL, 11.75, .95, .32, .32, LILACL)
-        forma(sl, MSO_SHAPE.OVAL, -.85, 6.75, 1.7, 1.7, ROSACL)
+        forma(sl, MSO_SHAPE.OVAL, 12.0, -1.15, 2.3, 2.3, P["durazno"][0])
+        forma(sl, MSO_SHAPE.OVAL, 11.7, .95, .36, .36, P["menta"][0])
+        forma(sl, MSO_SHAPE.OVAL, -.85, 6.75, 1.7, 1.7, P["celeste"][0])
+
+
+def subrayado(sl, x, y):
+    for i, k in enumerate(["rosa", "lila", "menta", "celeste"]):
+        forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, x + i * .42, y, .34, .09, P[k][1] if i == 0 else P[k][0], radio=.5)
 
 
 def nueva(titulo, clave):
     sl = prs.slides.add_slide(BLANK)
     cnt[0] += 1
     fondo(sl)
-    forma(sl, MSO_SHAPE.HEART, .6, .46, .32, .29, ROSA)
-    caja(sl, 1.05, .22, 10.8, .8, titulo, 30, CIRUELA, True)
-    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, 1.12, 1.0, 1.6, .09, ROSA, radio=.5)
-    forma(sl, MSO_SHAPE.OVAL, 12.4, 6.92, .42, .42, ROSA)
-    caja(sl, 12.25, 6.93, .72, .4, f"{cnt[0]}", 12, BL, True, True)
+    caja(sl, .6, .22, 11.2, .8, titulo, 30, TINTA, True)
+    subrayado(sl, .7, 1.0)
+    forma(sl, MSO_SHAPE.OVAL, 12.4, 6.92, .42, .42, P["lila"][0])
+    caja(sl, 12.25, 6.93, .72, .4, f"{cnt[0]}", 12, P["lila"][1], True, True)
     caja(sl, .9, 6.98, 6, .4, "Equipo 4 · Fundamentos de Econometría", 10, SUAVE)
     sl.notes_slide.notes_text_frame.text = f"[{QUIEN[clave]}] {GUION[clave]}"
     return sl
 
 
-def dato(sl, x, y, valor, etiqueta, w=3.9, color=ROSA):
-    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, 2.45, BL, ROSACL if color == ROSA else LILACL, 2, .18)
-    caja(sl, x, y + .2, w, 1.0, valor, 44, color, True, True)
+def dato(sl, x, y, valor, etiqueta, w=3.9, tono="rosa"):
+    claro, fuerte = P[tono]
+    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, 2.45, claro, radio=.18)
+    caja(sl, x, y + .2, w, 1.0, valor, 44, fuerte, True, True)
     caja(sl, x + .15, y + 1.2, w - .3, 1.2, etiqueta, 17, TXT, False, True)
 
 
 def mensaje(sl, texto, y=6.1):
-    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, .55, y, 12.2, .72, ROSA, radio=.5)
-    caja(sl, .8, y + .11, 11.7, .6, "♡  " + texto, 17, BL, True, True)
+    claro, fuerte = P[ORDEN_MSJ[cnt[0] % len(ORDEN_MSJ)]]
+    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, .55, y, 12.2, .72, claro, radio=.5)
+    caja(sl, .8, y + .11, 11.7, .6, texto, 17, fuerte, True, True)
 
 
 def img(sl, nombre, x, y, h):
-    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, x - .15, y - .12, h * 1.72 + .3, h + .24, BL, ROSACL, 1.5, .06)
+    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, x - .15, y - .12, h * 1.72 + .3, h + .24, BL, hexrgb("#E7E2EC"), 1.25, .06)
     sl.shapes.add_picture(str(FIG / f"{nombre}.png"), Inches(x), Inches(y), height=Inches(h))
 
 
@@ -235,54 +244,58 @@ def tabla(sl, filas, x, y, w, anchos, size=16):
             c = tb.cell(i, j)
             c.text = str(v)
             c.fill.solid()
-            c.fill.fore_color.rgb = ROSA if i == 0 else (BL if i % 2 else ROSACL)
+            c.fill.fore_color.rgb = P["lila"][0] if i == 0 else (BL if i % 2 else P["celeste"][0])
             for p in c.text_frame.paragraphs:
                 p.font.size, p.font.bold, p.font.name = Pt(size), i == 0, FUENTE
-                p.font.color.rgb = BL if i == 0 else TXT
+                p.font.color.rgb = P["lila"][1] if i == 0 else TXT
 
 
-def pastilla(sl, x, y, w, texto, relleno=ROSACL, color=CIRUELA, size=16):
-    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, .5, relleno, radio=.5)
-    caja(sl, x, y + .04, w, .45, texto, size, color, True, True)
+def pastilla(sl, x, y, w, texto, tono="rosa", size=16):
+    claro, fuerte = P[tono]
+    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, .5, claro, radio=.5)
+    caja(sl, x, y + .04, w, .45, texto, size, fuerte, True, True)
 
+
+NOMBRES_EQ = [("Ximena Lara", "rosa"), ("Camila Ricardi", "lila"), ("Sara Enriquez", "menta")]
 
 # 1 portada
 sl = prs.slides.add_slide(BLANK)
 cnt[0] += 1
 fondo(sl, portada=True)
-pastilla(sl, .9, 1.05, 3.6, "Fundamentos de Econometría", ROSA, BL, 14)
-caja(sl, .9, 1.75, 11, 1.2, "Escolaridad, habilidad y salario", 48, CIRUELA, True)
-caja(sl, .9, 2.85, 9.5, 1.2, "¿La multicolinealidad nos impide medir cuánto se asocia la escuela con el salario?", 23, ROSA)
+pastilla(sl, .9, 1.05, 3.6, "Fundamentos de Econometría", "celeste", 14)
+caja(sl, .9, 1.75, 11, 1.2, "Escolaridad, habilidad y salario", 48, TINTA, True)
+caja(sl, .9, 2.85, 7.6, 1.2, "¿La multicolinealidad nos impide medir cuánto se asocia la escuela con el salario?", 23,
+     P["lila"][1])
 caja(sl, .9, 4.25, 4, .4, "Equipo 4", 15, SUAVE, True)
-for i, nom in enumerate(["Ximena Lara", "Camila Ricardi", "Sara Enriquez"]):
-    pastilla(sl, .9 + i * 2.75, 4.7, 2.55, nom)
-caja(sl, .9, 5.6, 10, .9, ["Prof. César Galindo · Universidad Panamericana · Noviembre 2026"], 15, TXT)
+for i, (nom, tono) in enumerate(NOMBRES_EQ):
+    pastilla(sl, .9 + i * 2.75, 4.7, 2.55, nom, tono)
+caja(sl, .9, 5.6, 9, .9, ["Prof. César Galindo · Universidad Panamericana · Noviembre 2026"], 15, TXT)
 sl.notes_slide.notes_text_frame.text = "[Ximena] Presentar al equipo y el título."
 
 # 2 pregunta
 sl = nueva("La pregunta", "pregunta")
 caja(sl, .8, 1.45, 11.8, 1.6, "¿Cuánto más gana alguien con un año más de escuela, comparado con alguien igual en "
-     "experiencia, habilidad y familia?", 27, CIRUELA, True)
-dato(sl, .8, 3.3, "H₁: β > 0", "esperamos una relación positiva", 3.8)
-dato(sl, 4.75, 3.3, "α = 5 %", "nivel de significancia fijado antes de estimar", 3.8)
-dato(sl, 8.7, 3.3, "≠ causa", "datos observacionales: medimos asociación", 3.8, LILA)
+     "experiencia, habilidad y familia?", 27, TINTA, True)
+dato(sl, .8, 3.3, "H₁: β > 0", "esperamos una relación positiva", 3.8, "rosa")
+dato(sl, 4.75, 3.3, "α = 5 %", "nivel de significancia fijado antes de estimar", 3.8, "celeste")
+dato(sl, 8.7, 3.3, "≠ causa", "datos observacionales: medimos asociación", 3.8, "durazno")
 mensaje(sl, "Reto: escolaridad, habilidad y familia se mueven juntas → multicolinealidad")
 
 # 3 datos
 sl = nueva("Datos", "datos")
-dato(sl, .8, 1.45, f"{n}", "hombres trabajadores de 28 a 38 años", 3.8)
-dato(sl, 4.75, 1.45, "1980", "EE. UU., encuesta NLS (corte transversal)", 3.8)
-dato(sl, 8.7, 1.45, "13", "variables explicativas", 3.8)
-caja(sl, .8, 4.15, 11.8, 2.4, [f"♡  Fuente: base WAGE2 de Wooldridge (Blackburn y Neumark, 1992) · consultada el 18/11/2026",
-                               f"♡  Limpieza: {n0} → {n} (quitamos {n0 - n} sin escolaridad de los padres)",
-                               f"♡  En promedio: salario de {D['wage']['mean']:.0f} USD al mes y {D['educ']['mean']:.1f} años "
+dato(sl, .8, 1.45, f"{n}", "hombres trabajadores de 28 a 38 años", 3.8, "lila")
+dato(sl, 4.75, 1.45, "1980", "EE. UU., encuesta NLS (corte transversal)", 3.8, "menta")
+dato(sl, 8.7, 1.45, "13", "variables explicativas", 3.8, "celeste")
+caja(sl, .8, 4.15, 11.8, 2.4, [f"•  Fuente: base WAGE2 de Wooldridge (Blackburn y Neumark, 1992) · consultada el 18/11/2026",
+                               f"•  Limpieza: {n0} → {n} (quitamos {n0 - n} sin escolaridad de los padres)",
+                               f"•  En promedio: salario de {D['wage']['mean']:.0f} USD al mes y {D['educ']['mean']:.1f} años "
                                "de escuela",
-                               "♡  Y = ln(salario mensual en USD de 1980) → los coeficientes se leen como %"], 18)
+                               "•  Y = ln(salario mensual en USD de 1980) → los coeficientes se leen como %"], 18)
 
 # 4 modelo
 sl = nueva("El modelo", "modelo")
-forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, 1.3, 1.35, 10.7, .9, BL, ROSACL, 2, .5)
-caja(sl, .8, 1.47, 11.8, .9, "ln(salario) = β₀ + β₁·escolaridad + experiencia + controles + u", 23, ROSA, True, True)
+forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, 1.3, 1.35, 10.7, .9, P["menta"][0], radio=.5)
+caja(sl, .8, 1.5, 11.8, .9, "ln(salario) = β₀ + β₁·escolaridad + experiencia + controles + u", 23, P["menta"][1], True, True)
 tabla(sl, [["Grupo", "Variables", "Signo esperado"],
            ["De interés", "escolaridad (educ)", "+"],
            ["Experiencia", "exper (centrada), exper², antigüedad, edad", "+"],
@@ -295,15 +308,16 @@ caja(sl, .8, 6.25, 11.8, .6, "Estimación: MCO con errores robustos (HC1) · gru
 # 5 resultado
 sl = nueva("Resultado principal", "resultado")
 img(sl, "pasos_educ", .65, 1.4, 4.4)
-caja(sl, 8.95, 1.7, 4.2, 1.2, f"{e1:.1f} % → {e3:.1f} %", 36, ROSA, True)
-caja(sl, 8.95, 2.9, 3.9, 3, "Al comparar personas con igual habilidad y familia, la asociación baja casi a la mitad", 20, CIRUELA)
+caja(sl, 8.95, 1.7, 4.2, 1.2, f"{e1:.1f} % → {e3:.1f} %", 36, P["lila"][1], True)
+caja(sl, 8.95, 2.9, 3.9, 3, "Al comparar personas con igual habilidad y familia, la asociación baja casi a la mitad", 20, TINTA)
 mensaje(sl, "Parte de lo que parecía «escuela» era habilidad: sesgo por variable omitida")
 
 # 6 interpretación
 sl = nueva("¿Qué significa?", "interpretacion")
-dato(sl, .8, 1.45, f"+{e3:.1f} %", f"de salario por un año más de escuela (≈ {usd:.0f} USD al mes)", 3.8)
-dato(sl, 4.75, 1.45, f"{ci3[0]:.0f}–{ci3[1]:.0f} %", "intervalo de confianza 95 %: no incluye 0 → se rechaza H₀", 3.8)
-dato(sl, 8.7, 1.45, f"+{cuatro:.0f} %", "con 4 años de universidad: relevante, no solo significativo", 3.8)
+dato(sl, .8, 1.45, f"+{e3:.1f} %", f"de salario por un año más de escuela (≈ {usd:.0f} USD al mes)", 3.8, "rosa")
+dato(sl, 4.75, 1.45, f"{ci3[0]:.0f}–{ci3[1]:.0f} %", "intervalo de confianza 95 %: no incluye 0 → se rechaza H₀", 3.8,
+     "celeste")
+dato(sl, 8.7, 1.45, f"+{cuatro:.0f} %", "con 4 años de universidad: relevante, no solo significativo", 3.8, "menta")
 caja(sl, .8, 4.3, 11.8, 1.5, [f"Otros: casado {pct(M3['params']['married']):+.0f} % · urbano {pct(M3['params']['urban']):+.0f} % · "
                               f"sur {pct(M3['params']['south']):+.0f} %  ·  IQ: +{100*M3['params']['IQ']*D['IQ']['std']:.0f} % "
                               "por desviación estándar"], 18, TXT, False, True)
@@ -311,17 +325,19 @@ mensaje(sl, "Todo «manteniendo constantes las demás variables»")
 
 # 7 multicolinealidad
 sl = nueva("Multicolinealidad: ¿dónde está?", "multi")
-img(sl, "vif_rosa", .65, 1.35, 4.5)
-caja(sl, 8.6, 1.4, 4.4, 4.5, [f"VIF de {VF['exper²']['VIF']:.0f}: artificio", "exper² se construye con exper",
-                              f"Al centrar: VIF máx. {R['vif_centrado_max']:.1f}", "",
-                              "Real pero moderada:", "escolaridad, IQ, KWW y padres (VIF 1.6–2.2)"], 18.5, CIRUELA)
+img(sl, "vif_pastel", .65, 1.35, 4.5)
+tf = caja(sl, 8.6, 1.4, 4.4, 4.5, [f"VIF de {VF['exper²']['VIF']:.0f}: artificio", "exper² se construye con exper",
+                                   f"Al centrar: VIF máx. {R['vif_centrado_max']:.1f}", "",
+                                   "Real pero moderada:", "escolaridad, IQ, KWW y padres (VIF 1.6–2.2)"], 18.5, TINTA)
+for i, k in ((0, "durazno"), (4, "menta")):
+    tf.paragraphs[i].font.bold, tf.paragraphs[i].font.color.rgb = True, P[k][1]
 mensaje(sl, "Un VIF alto no se arregla quitando variables: primero hay que entender de dónde viene")
 
 # 8 impide
 sl = nueva("¿Nos impide responder?", "impide")
-dato(sl, .8, 1.45, f"×{se_ratio:.1f}", "error estándar de escolaridad inflado por la correlación", 3.8, LILA)
-dato(sl, 4.75, 1.45, f"F = {PF[0]['F']:.1f}", "IQ, KWW y padres: solos no significativos, juntos sí (p < 0.001)", 3.8)
-dato(sl, 8.7, 1.45, f"{lo:.1f}–{hi:.1f} %", f"si quitamos o combinamos controles (vs {e3:.1f} %): casi igual", 3.8)
+dato(sl, .8, 1.45, f"×{se_ratio:.1f}", "error estándar de escolaridad inflado por la correlación", 3.8, "durazno")
+dato(sl, 4.75, 1.45, f"F = {PF[0]['F']:.1f}", "IQ, KWW y padres: solos no significativos, juntos sí (p < 0.001)", 3.8, "lila")
+dato(sl, 8.7, 1.45, f"{lo:.1f}–{hi:.1f} %", f"si quitamos o combinamos controles (vs {e3:.1f} %): casi igual", 3.8, "menta")
 mensaje(sl, "No: el intervalo de escolaridad sigue lejos de cero. Solo cuesta separar los controles entre sí", 5.2)
 
 # 9 diagnóstico
@@ -335,25 +351,25 @@ mensaje(sl, "Ningún problema cambia la conclusión", 5.2)
 
 # 10 conclusiones
 sl = nueva("Conclusiones", "conclusion")
-for i, t in enumerate([f"Un año más de escuela se asocia con +{e3:.1f} % de salario entre personas comparables",
-                       "La multicolinealidad infla la varianza, pero no impide responder",
-                       "Limitaciones: no es causal · posible selección · solo hombres de EE. UU. en 1980"]):
+for i, (t, k) in enumerate([(f"Un año más de escuela se asocia con +{e3:.1f} % de salario entre personas comparables", "rosa"),
+                            ("La multicolinealidad infla la varianza, pero no impide responder", "celeste"),
+                            ("Limitaciones: no es causal · posible selección · solo hombres de EE. UU. en 1980", "menta")]):
     y = 1.5 + i * 1.12
-    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, .8, y, 11.8, .9, BL, ROSACL, 1.5, .3)
-    forma(sl, MSO_SHAPE.OVAL, 1.0, y + .17, .56, .56, ROSA)
-    caja(sl, .95, y + .2, .66, .5, str(i + 1), 18, BL, True, True)
-    caja(sl, 1.8, y + .17, 10.6, .7, t, 20, CIRUELA)
+    forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, .8, y, 11.8, .9, P[k][0], radio=.3)
+    forma(sl, MSO_SHAPE.OVAL, 1.0, y + .17, .56, .56, BL)
+    caja(sl, .95, y + .2, .66, .5, str(i + 1), 18, P[k][1], True, True)
+    caja(sl, 1.8, y + .17, 10.6, .7, t, 20, TINTA)
 mensaje(sl, f"¿Qué cambiaría la conclusión? Incluir o no la habilidad: {e1:.1f} % → {e3:.1f} %", 5.15)
 
 # 11 cierre
 sl = nueva("Gracias · ¿preguntas?", "cierre")
-forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, .8, 1.5, 11.8, 1.5, ROSACL, radio=.2)
+forma(sl, MSO_SHAPE.ROUNDED_RECTANGLE, .8, 1.5, 11.8, 1.5, P["lila"][0], radio=.2)
 caja(sl, 1.1, 1.62, 11.2, 1.3, ["En una frase:", f"un año más de escuela se asocia con +{e3:.1f} % de salario, y la "
-                                "multicolinealidad no nos impide medirlo"], 21, CIRUELA, True, True)
-caja(sl, .8, 3.45, 11.8, 2, ["♡  Código, datos y diccionario: github.com/ximeelaraa/mincer-multicolinealidad",
-                             "♡  Fuentes: Blackburn y Neumark (1992) · Mincer (1974) · Wooldridge (2020) · Galindo (2026)"], 18)
-for i, nom in enumerate(["Ximena Lara", "Camila Ricardi", "Sara Enriquez"]):
-    pastilla(sl, 2.35 + i * 2.95, 5.3, 2.65, nom)
+                                "multicolinealidad no nos impide medirlo"], 21, P["lila"][1], True, True)
+caja(sl, .8, 3.45, 11.8, 2, ["•  Código, datos y diccionario: github.com/ximeelaraa/mincer-multicolinealidad",
+                             "•  Fuentes: Blackburn y Neumark (1992) · Mincer (1974) · Wooldridge (2020) · Galindo (2026)"], 18)
+for i, (nom, tono) in enumerate(NOMBRES_EQ):
+    pastilla(sl, 2.35 + i * 2.95, 5.3, 2.65, nom, tono)
 prs.save(ROOT / "Presentacion_Final.pptx")
 
 # ------------------------------------------------------------------ BEAMER (mismo contenido)
@@ -363,6 +379,8 @@ def T(_t, **kw):
     return _t
 
 
+colores = "\n".join(rf"\definecolor{{{k}}}{{HTML}}{{{a[1:]}}}" + "\n" + rf"\definecolor{{{k}f}}{{HTML}}{{{b[1:]}}}"
+                    for k, (a, b) in PASTEL.items())
 tex = T(r"""\documentclass[aspectratio=169,11pt,xcolor={table}]{beamer}
 \usepackage{iftex}
 \ifPDFTeX
@@ -378,53 +396,51 @@ tex = T(r"""\documentclass[aspectratio=169,11pt,xcolor={table}]{beamer}
 \usepackage{amsmath,amssymb,booktabs,graphicx,tikz}
 \usepackage[most]{tcolorbox}
 \graphicspath{{figuras/}}
-\definecolor{rosa}{HTML}{@ROSA@}
-\definecolor{rosaclaro}{HTML}{@ROSACL@}
-\definecolor{blush}{HTML}{@BLUSH@}
-\definecolor{ciruela}{HTML}{@CIRUELA@}
-\definecolor{lila}{HTML}{@LILA@}
-\definecolor{lilaclaro}{HTML}{EDE3F7}
+@COLORES@
+\definecolor{tinta}{HTML}{@TINTA@}
 \definecolor{texto}{HTML}{@TEXTO@}
 \definecolor{gris}{HTML}{@GRIS@}
-\newcommand{\corazon}{\ensuremath{\heartsuit}}
+\definecolor{crema}{HTML}{@CREMA@}
+\definecolor{borde}{HTML}{E7E2EC}
 \AtBeginDocument{\hyphenpenalty=10000\exhyphenpenalty=10000}
 \setbeamercolor{normal text}{fg=texto}
-\setbeamercolor{structure}{fg=rosa}
-\setbeamercolor{alerted text}{fg=lila}
+\setbeamercolor{structure}{fg=lilaf}
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{background}{%
   \begin{tikzpicture}
   \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
-  \fill[blush] (0,0) rectangle (\paperwidth,\paperheight);
-  \fill[rosaclaro] (\paperwidth,\paperheight) circle (1.5cm);
-  \fill[lilaclaro] (\paperwidth-1.75cm,\paperheight-1.45cm) circle (0.13cm);
-  \fill[rosaclaro] (0,0) circle (0.9cm);
+  \fill[crema] (0,0) rectangle (\paperwidth,\paperheight);
+  \fill[durazno] (\paperwidth,\paperheight) circle (1.5cm);
+  \fill[menta] (\paperwidth-1.75cm,\paperheight-1.45cm) circle (0.14cm);
+  \fill[celeste] (0,0) circle (0.9cm);
   \end{tikzpicture}}
+\newcommand{\subrayado}{\tikz{\foreach \c/\x in {rosaf/0,lila/0.6,menta/1.2,celeste/1.8}
+  \draw[\c,line width=3pt,line cap=round] (\x cm,0)--(\x cm+0.42cm,0);}}
 \setbeamertemplate{frametitle}{%
-  \vspace{0.55em}{\color{rosa}\small\corazon}\hspace{0.45em}{\color{ciruela}\Large\bfseries\insertframetitle}\par
-  \vspace{-0.1em}\hspace{1.35em}\tikz\draw[rosa,line width=2.6pt,line cap=round] (0,0)--(1.6cm,0);\par}
+  \vspace{0.55em}{\color{tinta}\Large\bfseries\insertframetitle}\par
+  \vspace{0.05em}\hspace{0.1em}\subrayado\par}
 \setbeamertemplate{footline}{%
   \hspace{1.6em}\raisebox{0.75em}{\tiny\color{gris}Equipo 4 $\cdot$ Fundamentos de Econometría}\hfill
-  \raisebox{0.45em}{\tikz\node[circle,fill=rosa,text=white,inner sep=0pt,minimum size=1.35em,font=\tiny\bfseries]{\insertframenumber};}\hspace{1.2em}}
-\setbeamertemplate{itemize item}{\color{rosa}\corazon}
-\setbeamertemplate{enumerate item}{\tikz[baseline=(n.base)]\node[circle,fill=rosa,text=white,inner sep=0pt,minimum size=1.3em,font=\footnotesize\bfseries](n){\insertenumlabel};}
-\newcommand{\pastilla}[2][rosaclaro]{\tikz[baseline=(p.base)]\node[fill=#1,rounded corners=7pt,inner xsep=9pt,inner ysep=4pt,text=ciruela,font=\small\bfseries](p){#2};}
-\newtcolorbox{tarjeta}[1][rosaclaro]{enhanced,colback=white,colframe=#1,boxrule=1pt,arc=9pt,left=6pt,right=6pt,top=4pt,bottom=4pt}
+  \raisebox{0.45em}{\tikz\node[circle,fill=lila,text=lilaf,inner sep=0pt,minimum size=1.35em,font=\tiny\bfseries]{\insertframenumber};}\hspace{1.2em}}
+\setbeamertemplate{itemize item}{\tikz[baseline=-0.6ex]\fill[celestef] (0,0) circle (0.09cm);}
+\setbeamertemplate{enumerate item}{\ifcase\value{enumi}\or\def\tono{rosa}\or\def\tono{celeste}\or\def\tono{menta}\else\def\tono{lila}\fi
+  \tikz[baseline=(n.base)]\node[circle,fill=\tono,text=\tono f,inner sep=0pt,minimum size=1.3em,font=\footnotesize\bfseries](n){\insertenumlabel};}
+\newcommand{\pastilla}[2][rosa]{\tikz[baseline=(p.base)]\node[fill=#1,rounded corners=7pt,inner xsep=9pt,inner ysep=4pt,text=#1f,font=\small\bfseries](p){#2};}
 \newcommand{\dato}[3][rosa]{%
-  \begin{tcolorbox}[enhanced,width=0.31\textwidth,height=2.75cm,valign=center,nobeforeafter,box align=top,colback=white,
-    colframe=#1!25,boxrule=1pt,arc=10pt,left=5pt,right=5pt,halign=center]
-  \hyphenpenalty=10000{\fontsize{21}{25}\selectfont\color{#1}\textbf{#2}}\\[0.45em]{\small #3}\end{tcolorbox}}
-\newcommand{\mensaje}[1]{\par\vfill
-  \begin{tcolorbox}[enhanced,colback=rosa,colframe=rosa,boxrule=0pt,arc=11pt,halign=center,left=8pt,right=8pt,top=4pt,bottom=4pt]
-  \hyphenpenalty=10000\color{white}\bfseries\corazon\ \ #1\end{tcolorbox}\vspace{0.1em}}
-\newcommand{\figura}[1]{\begin{tarjeta}\includegraphics[width=\linewidth]{#1}\end{tarjeta}}
+  \begin{tcolorbox}[enhanced,width=0.31\textwidth,height=2.75cm,valign=center,nobeforeafter,box align=top,colback=#1,
+    colframe=#1,boxrule=0pt,arc=10pt,left=5pt,right=5pt,halign=center]
+  {\fontsize{21}{25}\selectfont\color{#1f}\textbf{#2}}\\[0.45em]{\small #3}\end{tcolorbox}}
+\newcommand{\mensaje}[2][lila]{\par\vfill
+  \begin{tcolorbox}[enhanced,colback=#1,colframe=#1,boxrule=0pt,arc=11pt,halign=center,left=8pt,right=8pt,top=4pt,bottom=4pt]
+  \color{#1f}\bfseries #2\end{tcolorbox}\vspace{0.1em}}
+\newcommand{\figura}[1]{\begin{tcolorbox}[enhanced,colback=white,colframe=borde,boxrule=0.8pt,arc=9pt,left=4pt,right=4pt,top=4pt,bottom=4pt]\includegraphics[width=\linewidth]{#1}\end{tcolorbox}}
 \setbeamertemplate{title page}{%
   \vspace{1.2em}
-  \pastilla[rosa]{\color{white}Fundamentos de Econometría}\par\vspace{1em}
-  {\fontsize{26}{30}\selectfont\color{ciruela}\bfseries\inserttitle\par}\vspace{0.6em}
-  \parbox{0.72\textwidth}{\raggedright\large\color{rosa}\insertsubtitle}\par\vspace{1.6em}
+  \pastilla[celeste]{Fundamentos de Econometría}\par\vspace{1em}
+  {\fontsize{26}{30}\selectfont\color{tinta}\bfseries\inserttitle\par}\vspace{0.6em}
+  \parbox{0.68\textwidth}{\raggedright\large\color{lilaf}\insertsubtitle}\par\vspace{1.6em}
   {\small\color{gris}\bfseries Equipo 4}\par\vspace{0.4em}
-  \pastilla{Ximena Lara}\hspace{0.5em}\pastilla{Camila Ricardi}\hspace{0.5em}\pastilla{Sara Enriquez}\par\vspace{1.4em}
+  \pastilla[rosa]{Ximena Lara}\hspace{0.5em}\pastilla[lila]{Camila Ricardi}\hspace{0.5em}\pastilla[menta]{Sara Enriquez}\par\vspace{1.4em}
   {\small\color{texto}\insertinstitute\ $\cdot$ \insertdate\par}}
 
 \title{Escolaridad, habilidad y salario}
@@ -437,31 +453,31 @@ tex = T(r"""\documentclass[aspectratio=169,11pt,xcolor={table}]{beamer}
 {\setbeamertemplate{background}{%
   \begin{tikzpicture}
   \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
-  \fill[blush] (0,0) rectangle (\paperwidth,\paperheight);
-  \fill[rosaclaro] (\paperwidth+0.4cm,\paperheight+0.3cm) circle (3.6cm);
-  \fill[lilaclaro] (\paperwidth-2.6cm,\paperheight-4.3cm) circle (0.3cm);
-  \fill[rosa] (\paperwidth-1.2cm,\paperheight-5.4cm) circle (0.12cm);
-  \fill[rosaclaro] (-0.3cm,-0.3cm) circle (1.9cm);
-  \node[text=rosa,font=\Large] at (\paperwidth-2.3cm,1.4cm) {\corazon};
+  \fill[crema] (0,0) rectangle (\paperwidth,\paperheight);
+  \fill[rosa] (\paperwidth+0.4cm,\paperheight+0.3cm) circle (3.6cm);
+  \fill[lila] (\paperwidth-3.3cm,\paperheight-4.3cm) circle (0.75cm);
+  \fill[menta] (\paperwidth-1.3cm,\paperheight-6.2cm) circle (0.5cm);
+  \fill[durazno] (\paperwidth-2.7cm,1.0cm) circle (0.22cm);
+  \fill[celeste] (-0.3cm,-0.3cm) circle (1.9cm);
   \end{tikzpicture}}
 \begin{frame}[plain]\titlepage\end{frame}}
 
 \begin{frame}{La pregunta}
 \vspace{0.3em}
-{\Large\color{ciruela}\textbf{¿Cuánto más gana alguien con un año más de escuela, comparado con alguien igual en experiencia, habilidad y familia?}}
+{\Large\color{tinta}\textbf{¿Cuánto más gana alguien con un año más de escuela, comparado con alguien igual en experiencia, habilidad y familia?}}
 \vspace{1em}
 
-\dato{$H_1:\beta>0$}{esperamos una relación positiva}\hfill
-\dato{$\alpha=5\%$}{nivel de significancia fijado antes de estimar}\hfill
-\dato[lila]{$\neq$ causa}{datos observacionales: medimos asociación}
-\mensaje{Reto: escolaridad, habilidad y familia se mueven juntas $\to$ multicolinealidad}
+\dato[rosa]{$H_1:\beta>0$}{esperamos una relación positiva}\hfill
+\dato[celeste]{$\alpha=5\%$}{nivel de significancia fijado antes de estimar}\hfill
+\dato[durazno]{$\neq$ causa}{datos observacionales: medimos asociación}
+\mensaje[lila]{Reto: escolaridad, habilidad y familia se mueven juntas $\to$ multicolinealidad}
 \end{frame}
 
 \begin{frame}{Datos}
 \vspace{0.3em}
-\dato{@n@}{hombres trabajadores de 28 a 38 años}\hfill
-\dato{1980}{EE.\,UU., encuesta NLS (corte transversal)}\hfill
-\dato{13}{variables explicativas}
+\dato[lila]{@n@}{hombres trabajadores de 28 a 38 años}\hfill
+\dato[menta]{1980}{EE.\,UU., encuesta NLS (corte transversal)}\hfill
+\dato[celeste]{13}{variables explicativas}
 \vspace{1em}
 \begin{itemize}
 \item Fuente: base WAGE2 de Wooldridge (Blackburn y Neumark, 1992), consultada el 18/11/2026.
@@ -472,15 +488,15 @@ tex = T(r"""\documentclass[aspectratio=169,11pt,xcolor={table}]{beamer}
 \end{frame}
 
 \begin{frame}{El modelo}
-\begin{tcolorbox}[enhanced,colback=white,colframe=rosaclaro,boxrule=1pt,arc=12pt,halign=center,top=1pt,bottom=1pt]
+\begin{tcolorbox}[enhanced,colback=menta,colframe=menta,boxrule=0pt,arc=12pt,halign=center,top=1pt,bottom=1pt]
 \[
-\color{rosa}\ln(\text{salario})=\beta_0+\beta_1\,\text{escolaridad}+\text{experiencia}+\text{controles}+u
+\color{mentaf}\ln(\text{salario})=\beta_0+\beta_1\,\text{escolaridad}+\text{experiencia}+\text{controles}+u
 \]
 \end{tcolorbox}
 \centering\small
-\rowcolors{2}{white}{rosaclaro}
+\rowcolors{2}{white}{celeste}
 \begin{tabular}{lll}
-\rowcolor{rosa}\color{white}\textbf{Grupo} & \color{white}\textbf{Variables} & \color{white}\textbf{Signo esperado}\\
+\rowcolor{lila}\color{lilaf}\textbf{Grupo} & \color{lilaf}\textbf{Variables} & \color{lilaf}\textbf{Signo esperado}\\
 De interés & escolaridad (educ) & $+$\\
 Experiencia & exper (centrada), exper$^2$, antigüedad, edad & $+$\\
 Habilidad & IQ, KWW (prueba de conocimiento laboral) & $+$\\
@@ -497,55 +513,55 @@ Dummies & casado, afroamericano, sur, urbano & $+\ -\ -\ +$\\
 \column{0.58\textwidth}
 \figura{pasos_educ}
 \column{0.4\textwidth}
-{\LARGE\color{rosa}\textbf{@e1@\,\% $\to$ @e3@\,\%}}\\[0.6em]
-{\color{ciruela}Al comparar personas con igual habilidad y familia, la asociación baja casi a la mitad.}
+{\LARGE\color{lilaf}\textbf{@e1@\,\% $\to$ @e3@\,\%}}\\[0.6em]
+{\color{tinta}Al comparar personas con igual habilidad y familia, la asociación baja casi a la mitad.}
 \end{columns}
-\mensaje{Parte de lo que parecía «escuela» era habilidad: sesgo por variable omitida}
+\mensaje[durazno]{Parte de lo que parecía «escuela» era habilidad: sesgo por variable omitida}
 \end{frame}
 
 \begin{frame}{¿Qué significa?}
 \vspace{0.3em}
-\dato{$+$@e3@\,\%}{de salario por un año más de escuela ($\approx$ @usd@ USD al mes)}\hfill
-\dato{@c0@--@c1@\,\%}{intervalo de confianza 95\,\%: no incluye 0 $\to$ se rechaza $H_0$}\hfill
-\dato{$+$@cu@\,\%}{con 4 años de universidad: relevante, no solo significativo}
+\dato[rosa]{$+$@e3@\,\%}{de salario por un año más de escuela ($\approx$ @usd@ USD al mes)}\hfill
+\dato[celeste]{@c0@--@c1@\,\%}{intervalo de confianza 95\,\%: no incluye 0 $\to$ se rechaza $H_0$}\hfill
+\dato[menta]{$+$@cu@\,\%}{con 4 años de universidad: relevante, no solo significativo}
 \vspace{1.2em}
 
 \centering Otros: casado @mar@\,\% $\cdot$ urbano @urb@\,\% $\cdot$ sur @sur@\,\% $\cdot$ IQ: $+$@iq@\,\% por desviación estándar.
-\mensaje{Todo «manteniendo constantes las demás variables»}
+\mensaje[lila]{Todo «manteniendo constantes las demás variables»}
 \end{frame}
 
 \begin{frame}{Multicolinealidad: ¿dónde está?}
 \begin{columns}[c]
 \column{0.54\textwidth}
-\figura{vif_rosa}
+\figura{vif_pastel}
 \column{0.44\textwidth}
-{\color{lila}\textbf{VIF de @v2@: artificio}}\\ exper$^2$ se construye con exper.\\ Al centrar: VIF máx.\ @vc@.\\[1em]
-{\color{rosa}\textbf{Real pero moderada:}}\\ escolaridad $\leftrightarrow$ IQ $\leftrightarrow$ KWW $\leftrightarrow$ padres (VIF 1.6--2.2).
+{\color{duraznof}\textbf{VIF de @v2@: artificio}}\\ exper$^2$ se construye con exper.\\ Al centrar: VIF máx.\ @vc@.\\[1em]
+{\color{mentaf}\textbf{Real pero moderada:}}\\ escolaridad $\leftrightarrow$ IQ $\leftrightarrow$ KWW $\leftrightarrow$ padres (VIF 1.6--2.2).
 \end{columns}
-\mensaje{Un VIF alto no se arregla quitando variables: primero hay que entender de dónde viene}
+\mensaje[celeste]{Un VIF alto no se arregla quitando variables: primero hay que entender de dónde viene}
 \end{frame}
 
 \begin{frame}{¿Nos impide responder?}
 \vspace{0.3em}
-\dato[lila]{$\times$@sr@}{error estándar de escolaridad inflado por la correlación}\hfill
-\dato{$F=@F0@$}{IQ, KWW y padres: solos no significativos, juntos sí ($p<0.001$)}\hfill
-\dato{@br@--@bp@\,\%}{si quitamos o combinamos controles (vs @e3@\,\%): casi igual}
-\mensaje{No: el intervalo de escolaridad sigue lejos de cero. Solo cuesta separar los controles entre sí}
+\dato[durazno]{$\times$@sr@}{error estándar de escolaridad inflado por la correlación}\hfill
+\dato[lila]{$F=@F0@$}{IQ, KWW y padres: solos no significativos, juntos sí ($p<0.001$)}\hfill
+\dato[menta]{@br@--@bp@\,\%}{si quitamos o combinamos controles (vs @e3@\,\%): casi igual}
+\mensaje[rosa]{No: el intervalo de escolaridad sigue lejos de cero. Solo cuesta separar los controles entre sí}
 \end{frame}
 
 \begin{frame}{¿Se cumplen los supuestos?}
 \vspace{0.6em}
 \centering
-\rowcolors{2}{white}{rosaclaro}
+\rowcolors{2}{white}{celeste}
 \small\renewcommand{\arraystretch}{1.45}
 \begin{tabular}{lll}
-\rowcolor{rosa}\color{white}\textbf{Revisión} & \color{white}\textbf{Resultado} & \color{white}\textbf{Qué hicimos}\\
+\rowcolor{lila}\color{lilaf}\textbf{Revisión} & \color{lilaf}\textbf{Resultado} & \color{lilaf}\textbf{Qué hicimos}\\
 Varianza constante (Breusch--Pagan) & $p=@bp_@$ $\to$ no & Errores robustos HC1\\
 Forma funcional (RESET) & $p=@rs@$ $\to$ bien & Nada\\
 Normalidad (Jarque--Bera) & $p<0.001$ $\to$ no & Con $n=@n@$ no afecta\\
 Exogeneidad & No se puede probar & Hablamos de asociación\\
 \end{tabular}
-\mensaje{Ningún problema cambia la conclusión}
+\mensaje[menta]{Ningún problema cambia la conclusión}
 \end{frame}
 
 \begin{frame}{Conclusiones}
@@ -557,20 +573,20 @@ Exogeneidad & No se puede probar & Hablamos de asociación\\
 \item Limitaciones: no es causal $\cdot$ posible selección $\cdot$ solo hombres de EE.\,UU. en 1980.
 \end{enumerate}
 \normalsize
-\mensaje{¿Qué cambiaría la conclusión? Incluir o no la habilidad: @e1@\,\% $\to$ @e3@\,\%}
+\mensaje[durazno]{¿Qué cambiaría la conclusión? Incluir o no la habilidad: @e1@\,\% $\to$ @e3@\,\%}
 \end{frame}
 
 \begin{frame}{Gracias $\cdot$ ¿preguntas?}
 \vspace{0.3em}
-\begin{tcolorbox}[enhanced,colback=rosaclaro,colframe=rosaclaro,arc=12pt,halign=center]
-{\color{ciruela}\bfseries En una frase: un año más de escuela se asocia con $+$@e3@\,\% de salario,\\ y la multicolinealidad no nos impide medirlo.}
+\begin{tcolorbox}[enhanced,colback=lila,colframe=lila,boxrule=0pt,arc=12pt,halign=center]
+{\color{lilaf}\bfseries En una frase: un año más de escuela se asocia con $+$@e3@\,\% de salario,\\ y la multicolinealidad no nos impide medirlo.}
 \end{tcolorbox}
 \begin{itemize}
 \item Código, datos y diccionario: \texttt{github.com/ximeelaraa/mincer-multicolinealidad}
 \item Fuentes: Blackburn y Neumark (1992) $\cdot$ Mincer (1974) $\cdot$ Wooldridge (2020) $\cdot$ Galindo (2026)
 \end{itemize}
 \vfill
-\centering\pastilla{Ximena Lara}\hspace{0.5em}\pastilla{Camila Ricardi}\hspace{0.5em}\pastilla{Sara Enriquez}
+\centering\pastilla[rosa]{Ximena Lara}\hspace{0.5em}\pastilla[lila]{Camila Ricardi}\hspace{0.5em}\pastilla[menta]{Sara Enriquez}
 \vspace{0.6em}
 \end{frame}
 \end{document}
@@ -580,11 +596,10 @@ Exogeneidad & No se puede probar & Hablamos de asociación\\
         iq=f"{100*M3['params']['IQ']*D['IQ']['std']:.0f}", v2=f"{VF['exper²']['VIF']:.0f}", vc=f"{R['vif_centrado_max']:.1f}",
         sr=f"{se_ratio:.1f}", F0=f"{PF[0]['F']:.1f}", br=f"{lo:.1f}", wm=f"{D['wage']['mean']:.0f}",
         em=f"{D['educ']['mean']:.1f}", bp=f"{hi:.1f}", bp_=f"{H['bp_p']:.3f}", rs=f"{R['reset']['p']:.2f}",
-        ROSA=ROSA_H[1:], ROSACL=ROSACL_H[1:], BLUSH=BLUSH_H[1:], CIRUELA=CIRUELA_H[1:], LILA=LILA_H[1:],
-        TEXTO=TEXTO_H[1:], GRIS=GRIS_H[1:])
+        COLORES=colores, TINTA=TINTA_H[1:], TEXTO=TEXTO_H[1:], GRIS=GRIS_H[1:], CREMA=CREMA_H[1:])
 (ROOT / "Presentacion_Beamer.tex").write_text(tex, encoding="utf-8")
 with zipfile.ZipFile(ROOT / "Beamer_Overleaf.zip", "w", zipfile.ZIP_DEFLATED) as z:
     z.write(ROOT / "Presentacion_Beamer.tex", "Presentacion_Beamer.tex")
-    for f in ("pasos_educ", "vif_rosa"):
+    for f in ("pasos_educ", "vif_pastel"):
         z.write(FIG / f"{f}.png", f"figuras/{f}.png")
 print("Listo: Presentacion_Final.pptx, Presentacion_Beamer.tex, Beamer_Overleaf.zip")
