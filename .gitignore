@@ -3,3 +3,7 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 ~$*
+
+# Material interno del equipo (no se publica)
+Guia_de_Estudio_y_Exposicion.*
+Guion_Exposicion_por_Integrante.*

@@ -15,7 +15,6 @@ Proyecto de **Fundamentos de Econometría** (Universidad Panamericana, Prof. Cé
 | 3. **Datos documentados** | [`data/wage2_muestra.csv`](data/wage2_muestra.csv) (archivo utilizado) · [`data/DICCIONARIO.md`](data/DICCIONARIO.md) (fuente, fecha de consulta, diccionario y transformaciones) |
 | 4. **Presentación** (8 min + 4 de preguntas) | **[`Presentacion_Beamer.pdf`](Presentacion_Beamer.pdf)** (11 diapositivas, la que se proyecta) · versión editable idéntica: [`Presentacion_Final.pptx`](Presentacion_Final.pptx) / [`.pdf`](Presentacion_Final.pdf), con el guion en las notas del orador |
 | Material complementario | [`Anexo_Tecnico_Temas_del_Curso.pdf`](Anexo_Tecnico_Temas_del_Curso.pdf): el resto de los temas del parcial aplicados a los mismos datos |
-| Para estudiar (no se entrega) | [`Guia_de_Estudio_y_Exposicion.pdf`](Guia_de_Estudio_y_Exposicion.pdf): explicación simple, conceptos, números clave, guion por diapositiva y preguntas probables |
 
 La presentación tiene **11 diapositivas** para los 8 minutos (unos 45 segundos cada una). [`Beamer_Overleaf.zip`](Beamer_Overleaf.zip) trae el `.tex` y sus figuras, listo para Overleaf.
 
@@ -54,7 +53,6 @@ MPLBACKEND=Agg python scripts/analisis.py      # figuras, resultados.json y data
 python scripts/generar_informe.py              # informe (Word)
 python scripts/generar_entregables.py          # anexo técnico (Word)
 python scripts/generar_presentacion.py         # presentación (PowerPoint y Beamer)
-python scripts/generar_guia.py                 # guía de estudio (Word)
 jupytext --to ipynb --output multicolinealidad_mincer.ipynb scripts/analisis.py   # notebook
 ```
 En **Google Colab**, sube el `.ipynb` y ejecútalo; la primera celda instala `wooldridge`.
